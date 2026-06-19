@@ -35,6 +35,7 @@ import FooterSignature from '../components/FooterSignature.astro';
 				<a href="#features" class="nav-link">Features</a>
 				<a href="#terminal-demo" class="nav-link">Live Demo</a>
 				<a href="#keybindings" class="nav-link">Keybindings</a>
+				<a href="#tutorial" class="nav-link">Learn Go</a>
 				<a href="#architecture" class="nav-link">Architecture</a>
 				<a href="#installation" class="nav-link">Installation</a>
 				<a href="#faq" class="nav-link">FAQ</a>
@@ -336,6 +337,90 @@ import FooterSignature from '../components/FooterSignature.astro';
 					<div class="key-info">
 						<span class="key-action">Direct Feed Selection</span>
 						<span class="key-desc">Jump straight to feeds (1:Top, 2:New, 3:Best, 4:Ask, 5:Show)</span>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Go Learning Roadmap Tutorial Section -->
+		<section id="tutorial" class="container tutorial-section reveal">
+			<div class="section-header">
+				<h2 class="section-title">Learn Go Level by Level</h2>
+				<p class="section-desc">Follow the roadmap steps to build the Hacker News terminal client from scratch. Click a level to view code and concepts.</p>
+			</div>
+
+			<div class="tutorial-container">
+				<!-- Level Tabs / Timeline -->
+				<div class="level-timeline">
+					<button class="level-tab active" data-level="1">
+						<span class="level-badge">LVL 1</span>
+						<span class="level-name">Boot Kernel</span>
+					</button>
+					<div class="timeline-line"></div>
+					<button class="level-tab" data-level="2">
+						<span class="level-badge">LVL 2</span>
+						<span class="level-name">State Model</span>
+					</button>
+					<div class="timeline-line"></div>
+					<button class="level-tab" data-level="3">
+						<span class="level-badge">LVL 3</span>
+						<span class="level-name">User Inputs</span>
+					</button>
+					<div class="timeline-line"></div>
+					<button class="level-tab" data-level="4">
+						<span class="level-badge">LVL 4</span>
+						<span class="level-name">Terminal View</span>
+					</button>
+					<div class="timeline-line"></div>
+					<button class="level-tab" data-level="5">
+						<span class="level-badge">LVL 5</span>
+						<span class="level-name">Going Async</span>
+					</button>
+				</div>
+
+				<!-- Active Level Dashboard -->
+				<div class="level-dashboard">
+					<div class="level-info">
+						<h3 id="level-title" class="level-title-text">Level 1: Booting the TUI Kernel</h3>
+						<p id="level-desc" class="level-desc-text">In Go, executable programs start inside package main with a main() function. We import Charm's Bubble Tea framework, initialize our model state, and run the program in alt screen mode.</p>
+						
+						<div class="level-meta-box">
+							<h4>Mission Checklist</h4>
+							<ul id="level-checklist" class="level-checklist-ul">
+								<li class="checked">Declare package main</li>
+								<li class="checked">Import github.com/charmbracelet/bubbletea</li>
+								<li class="checked">Invoke tea.NewProgram event loop</li>
+								<li class="checked">Initialize alt screen buffer</li>
+							</ul>
+						</div>
+
+						<div class="level-nav-buttons">
+							<button id="lvl-prev-btn" class="btn-lvl-nav" disabled>❮ Prev Level</button>
+							<button id="lvl-next-btn" class="btn-lvl-nav">Next Level ❯</button>
+						</div>
+					</div>
+
+					<!-- Code Panel -->
+					<div class="level-code">
+						<div class="code-header">
+							<span class="code-lang">main.go</span>
+							<span class="code-mode">go run</span>
+						</div>
+						<pre class="code-pre"><code id="level-code-block" class="language-go">package main
+
+import (
+	"fmt"
+	"os"
+	tea "github.com/charmbracelet/bubbletea"
+)
+
+func main() &#123;
+	p := tea.NewProgram(initialModel(), tea.WithAltScreen())
+	if _, err := p.Run(); err != nil &#123;
+		fmt.Printf("Error: %v\n", err)
+		os.Exit(1)
+	&#125;
+&#125;</code></pre>
 					</div>
 				</div>
 			</div>
@@ -1585,6 +1670,246 @@ go build -o hn-client main.go</code></pre>
 		line-height: 1.4;
 	}
 
+	/* Tutorial Section */
+	.tutorial-section {
+		padding: 80px 20px;
+	}
+
+	.tutorial-container {
+		max-width: 960px;
+		margin: 0 auto;
+		display: flex;
+		flex-direction: column;
+		gap: 40px;
+	}
+
+	.level-timeline {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		background: rgba(20, 21, 33, 0.5);
+		border: 1px solid var(--border-color);
+		padding: 15px 30px;
+		border-radius: 12px;
+		backdrop-filter: blur(10px);
+		box-shadow: var(--shadow-sm);
+	}
+
+	.level-tab {
+		background: transparent;
+		border: none;
+		cursor: pointer;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 6px;
+		transition: transform 0.2s, opacity 0.2s;
+		opacity: 0.5;
+	}
+
+	.level-tab:hover {
+		transform: translateY(-2px);
+		opacity: 0.8;
+	}
+
+	.level-tab.active {
+		opacity: 1;
+	}
+
+	.level-badge {
+		background: rgba(255, 255, 255, 0.05);
+		color: var(--text-muted);
+		font-size: 10px;
+		font-weight: 700;
+		padding: 3px 8px;
+		border-radius: 4px;
+		border: 1px solid rgba(255, 255, 255, 0.05);
+		font-family: 'Fira Code', monospace;
+		transition: background-color 0.2s, color 0.2s;
+	}
+
+	.level-tab.active .level-badge {
+		background: rgba(255, 102, 0, 0.15);
+		color: var(--hn-orange);
+		border-color: var(--hn-orange);
+	}
+
+	.level-name {
+		color: var(--text-muted);
+		font-size: 13px;
+		font-weight: 600;
+		transition: color 0.2s;
+	}
+
+	.level-tab.active .level-name {
+		color: #ffffff;
+	}
+
+	.timeline-line {
+		flex: 1;
+		height: 1px;
+		background: var(--border-color);
+		margin: 0 15px;
+	}
+
+	.level-dashboard {
+		display: grid;
+		grid-template-columns: 1fr 1.2fr;
+		gap: 40px;
+		align-items: start;
+	}
+
+	@media (max-width: 800px) {
+		.level-dashboard {
+			grid-template-columns: 1fr;
+		}
+		.level-timeline {
+			flex-direction: column;
+			gap: 15px;
+			align-items: stretch;
+		}
+		.timeline-line {
+			height: 1px;
+			width: 100%;
+			margin: 5px 0;
+			display: none;
+		}
+	}
+
+	.level-info {
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+	}
+
+	.level-title-text {
+		font-family: 'Outfit', sans-serif;
+		font-size: 24px;
+		font-weight: 800;
+		color: #ffffff;
+	}
+
+	.level-desc-text {
+		color: var(--text-muted);
+		font-size: 15px;
+		line-height: 1.6;
+	}
+
+	.level-meta-box {
+		background: rgba(255, 255, 255, 0.02);
+		border: 1px solid var(--border-color);
+		border-radius: 8px;
+		padding: 20px;
+	}
+
+	.level-meta-box h4 {
+		font-size: 14px;
+		font-weight: 700;
+		color: #ffffff;
+		margin-bottom: 12px;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+	}
+
+	.level-checklist-ul {
+		list-style: none;
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+
+	.level-checklist-ul li {
+		position: relative;
+		padding-left: 24px;
+		color: var(--text-muted);
+		font-size: 14px;
+	}
+
+	.level-checklist-ul li::before {
+		content: "○";
+		position: absolute;
+		left: 0;
+		color: var(--gray);
+		font-weight: bold;
+	}
+
+	.level-checklist-ul li.checked {
+		color: #ffffff;
+	}
+
+	.level-checklist-ul li.checked::before {
+		content: "✓";
+		color: var(--hn-orange);
+	}
+
+	.level-nav-buttons {
+		display: flex;
+		gap: 15px;
+		margin-top: 10px;
+	}
+
+	.btn-lvl-nav {
+		background: rgba(255, 255, 255, 0.05);
+		color: #ffffff;
+		border: 1px solid var(--border-color);
+		padding: 10px 20px;
+		border-radius: 6px;
+		cursor: pointer;
+		font-weight: 600;
+		font-size: 13px;
+		transition: background-color 0.2s, border-color 0.2s;
+	}
+
+	.btn-lvl-nav:hover:not(:disabled) {
+		background: rgba(255, 102, 0, 0.1);
+		border-color: var(--hn-orange);
+	}
+
+	.btn-lvl-nav:disabled {
+		opacity: 0.3;
+		cursor: not-allowed;
+	}
+
+	.level-code {
+		background: #0b0c13;
+		border: 1px solid var(--border-color);
+		border-radius: 12px;
+		overflow: hidden;
+		box-shadow: var(--shadow-sm);
+	}
+
+	.code-header {
+		display: flex;
+		justify-content: space-between;
+		background: rgba(255, 255, 255, 0.02);
+		border-bottom: 1px solid var(--border-color);
+		padding: 10px 18px;
+		font-family: 'Fira Code', monospace;
+		font-size: 12px;
+	}
+
+	.code-lang {
+		color: var(--text-muted);
+	}
+
+	.code-mode {
+		color: var(--hn-orange);
+		font-weight: bold;
+	}
+
+	.code-pre {
+		margin: 0;
+		padding: 20px;
+		overflow-x: auto;
+	}
+
+	.code-pre code {
+		font-family: 'Fira Code', monospace;
+		font-size: 13px;
+		line-height: 1.5;
+		color: #e2e8f0;
+	}
+
 	/* Architecture Section */
 	.architecture-section {
 		padding: 80px 20px;
@@ -2645,5 +2970,197 @@ go build -o hn-client main.go</code></pre>
 				link.classList.add('active');
 			}
 		});
+	});
+
+	// Go Tutorial Level Data
+	const tutorialLevels = {
+		1: {
+			title: "Level 1: Booting the TUI Kernel",
+			desc: "In Go, executable programs start inside package main with a main() function. We import Charm's Bubble Tea framework, initialize our model state, and run the program in alt screen mode.",
+			checklist: [
+				"Declare package main",
+				"Import github.com/charmbracelet/bubbletea",
+				"Invoke tea.NewProgram event loop",
+				"Initialize alt screen buffer"
+			],
+			code: `package main
+
+import (
+	"fmt"
+	"os"
+	tea "github.com/charmbracelet/bubbletea"
+)
+
+func main() {
+	p := tea.NewProgram(initialModel(), tea.WithAltScreen())
+	if _, err := p.Run(); err != nil {
+		fmt.Printf("Error: %v\n", err)
+		os.Exit(1)
+	}
+}`
+		},
+		2: {
+			title: "Level 2: The UI Blueprint (State)",
+			desc: "Go is statically typed. Instead of object-oriented classes, we use struct to define our state shape. The initialModel() function acts as our constructor, allocating memory for maps and setting defaults.",
+			checklist: [
+				"Declare type model struct",
+				"Define fields for list cursor, category, loading states",
+				"Write initialModel() helper function",
+				"Use make() to allocate comments map"
+			],
+			code: `type model struct {
+	stories  []hnapi.Item
+	comments map[int][]comment
+	cursor   int
+	loading  bool
+}
+
+func initialModel() model {
+	return model{
+		loading:  true,
+		comments: make(map[int][]comment),
+		cursor:   0,
+	}
+}`
+		},
+		3: {
+			title: "Level 3: Intercepting Key Inputs",
+			desc: "The Update function receives keyboard, mouse, and other events. We use a type switch (msg := msg.(type)) to match key messages and map j/k Vim keys to moving the list cursor, or q to quit.",
+			checklist: [
+				"Implement Update(msg tea.Msg) method",
+				"Check if message is tea.KeyMsg type",
+				"Switch on keys: q, ctrl+c to tea.Quit",
+				"Modify cursor variable for Vim navigation keys"
+			],
+			code: `func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "q", "ctrl+c":
+			return m, tea.Quit
+		case "up", "k":
+			if m.cursor > 0 { m.cursor-- }
+		case "down", "j":
+			m.cursor++
+		}
+	}
+	return m, nil
+}`
+		},
+		4: {
+			title: "Level 4: Rendering Graphics to Screen",
+			desc: "The View method takes the current model state and renders it as a printable string. Lip Gloss is used to style text with colors, borders, and margins directly in your shell buffer.",
+			checklist: [
+				"Implement View() string receiver method",
+				"Verify model.loading state before drawing list",
+				"Iterate stories slice with for-range loop",
+				"Apply orange highlight styling to the selected cursor item"
+			],
+			code: `func (m model) View() string {
+	if m.loading {
+		return "⌛ Loading stories..."
+	}
+	var s string
+	s += "─── Hacker News ───\n\n"
+	for i, story := range m.stories {
+		if m.cursor == i {
+			s += fmt.Sprintf("❯ %s\n", story.Title)
+		} else {
+			s += fmt.Sprintf("  %s\n", story.Title)
+		}
+	}
+	s += "\n(q: quit | j/k: navigate)"
+	return s
+}`
+		},
+		5: {
+			title: "Level 5: Going Async & Launching w3m",
+			desc: "Go handles async routines concurrently. Bubble Tea commands (tea.Cmd) execute in a background goroutine and send success or error messages back to the main UI thread once completed.",
+			checklist: [
+				"Create asynchronous fetchStories() command",
+				"Process statusMsg payload in Update loop",
+				"Setup exec.Command(\"w3m\", url) process",
+				"Use tea.ExecProcess to suspend TUI and handoff to w3m"
+			],
+			code: `func fetchStories(category string) tea.Cmd {
+	return func() tea.Msg {
+		stories, err := hnapi.GetStories(category)
+		if err != nil {
+			return errMsg{err}
+		}
+		return statusMsg(stories)
+	}
+}
+
+func openURL(url string) tea.Cmd {
+	c := exec.Command("w3m", url)
+	return tea.ExecProcess(c, func(err error) tea.Msg {
+		if err != nil { return errMsg{err} }
+		return nil
+	})
+}`
+		}
+	};
+
+	let currentLevel = 1;
+	const levelTabs = document.querySelectorAll('.level-tab');
+	const levelTitle = document.getElementById('level-title');
+	const levelDesc = document.getElementById('level-desc');
+	const levelChecklist = document.getElementById('level-checklist');
+	const levelCodeBlock = document.getElementById('level-code-block');
+	const lvlPrevBtn = document.getElementById('lvl-prev-btn');
+	const lvlNextBtn = document.getElementById('lvl-next-btn');
+
+	function updateLevelUI(lvl) {
+		currentLevel = lvl;
+		const data = tutorialLevels[lvl];
+		if (!data) return;
+
+		// Update tabs active state
+		levelTabs.forEach(tab => {
+			const tabLvl = parseInt(tab.getAttribute('data-level') || '1');
+			if (tabLvl === lvl) {
+				tab.classList.add('active');
+			} else {
+				tab.classList.remove('active');
+			}
+		});
+
+		// Update texts
+		if (levelTitle) levelTitle.innerText = data.title;
+		if (levelDesc) levelDesc.innerText = data.desc;
+		if (levelCodeBlock) levelCodeBlock.innerText = data.code;
+
+		// Update checklist
+		if (levelChecklist) {
+			levelChecklist.innerHTML = data.checklist.map(item => `<li class="checked">${item}</li>`).join('');
+		}
+
+		// Update buttons disable state
+		if (lvlPrevBtn) {
+			lvlPrevBtn.disabled = (lvl === 1);
+		}
+		if (lvlNextBtn) {
+			lvlNextBtn.disabled = (lvl === 5);
+		}
+	}
+
+	levelTabs.forEach(tab => {
+		tab.addEventListener('click', () => {
+			const lvl = parseInt(tab.getAttribute('data-level') || '1');
+			updateLevelUI(lvl);
+		});
+	});
+
+	lvlPrevBtn?.addEventListener('click', () => {
+		if (currentLevel > 1) {
+			updateLevelUI(currentLevel - 1);
+		}
+	});
+
+	lvlNextBtn?.addEventListener('click', () => {
+		if (currentLevel < 5) {
+			updateLevelUI(currentLevel + 1);
+		}
 	});
 </script>
