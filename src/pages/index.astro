@@ -1,0 +1,966 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout>
+	<!-- Hero Background Glows -->
+	<div class="hero-glow"></div>
+	<div class="hero-glow-secondary"></div>
+
+	<!-- Header -->
+	<header class="header">
+		<div class="container header-container">
+			<a href="#" class="logo">
+				<span class="logo-box">HN</span>
+				<span class="logo-text">hn-client<span class="cursor-blink">_</span></span>
+			</a>
+			<nav class="nav">
+				<a href="#features" class="nav-link">Features</a>
+				<a href="#terminal-demo" class="nav-link">Live Demo</a>
+				<a href="#installation" class="nav-link">Installation</a>
+				<a href="https://github.com/aeon022/hn-client" target="_blank" rel="noopener" class="nav-github">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
+					GitHub
+				</a>
+			</nav>
+		</div>
+	</header>
+
+	<main class="main">
+		<!-- Hero Section -->
+		<section class="hero container">
+			<div class="badge">
+				<span class="badge-dot"></span>
+				<span class="badge-text">Version 1.0.0 Jetzt Verfügbar</span>
+			</div>
+			<h1 class="hero-title">
+				Hacker News. <br />
+				<span class="gradient-text">Direkt in deinem Terminal.</span>
+			</h1>
+			<p class="hero-subtitle">
+				Ein moderner, rasend schneller und minimalistischer Client. Entwickelt in Go mit Bubble Tea & Lip Gloss. Bietet intuitive Vim-Navigation, Maus-Scrolling und nahtlose w3m/Vim-Schreibintegration.
+			</p>
+
+			<div class="hero-actions">
+				<a href="#installation" class="btn btn-primary">Jetzt installieren</a>
+				<div class="install-code-container">
+					<code id="install-command">go install github.com/aeon022/hn-client@latest</code>
+					<button id="copy-btn" class="copy-btn" title="In Zwischenablage kopieren">
+						<svg id="copy-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+						<span id="copy-btn-text">Kopieren</span>
+					</button>
+				</div>
+			</div>
+		</section>
+
+		<!-- Interactive Terminal Mockup -->
+		<section id="terminal-demo" class="container terminal-section">
+			<div class="section-header">
+				<h2 class="section-title">Erlebe die TUI im Browser</h2>
+				<p class="section-desc">Klicke auf die Tabs im Mockup, um zwischen den echten Hacker News Kategorien zu wechseln.</p>
+			</div>
+
+			<div class="terminal-window">
+				<!-- Window Title Bar -->
+				<div class="terminal-bar">
+					<div class="window-buttons">
+						<span class="win-btn win-close"></span>
+						<span class="win-btn win-min"></span>
+						<span class="win-btn win-max"></span>
+					</div>
+					<div class="window-title">go (w3m) — hn-client</div>
+					<div class="window-layout-spacer"></div>
+				</div>
+
+				<!-- Terminal Body -->
+				<div class="terminal-body">
+					<!-- TUI Header -->
+					<div class="tui-header">
+						<span class="tui-app-title"> HACKER NEWS </span>
+						<div class="tui-tabs">
+							<button class="tui-tab active" data-cat="top"> TOP </button>
+							<button class="tui-tab" data-cat="new"> NEW </button>
+							<button class="tui-tab" data-cat="best"> BEST </button>
+							<button class="tui-tab" data-cat="ask"> ASK </button>
+							<button class="tui-tab" data-cat="show"> SHOW </button>
+						</div>
+					</div>
+
+					<div class="tui-divider"></div>
+
+					<!-- TUI Content (Stories List) -->
+					<div class="tui-content" id="stories-list">
+						<!-- Will be filled dynamically by JavaScript -->
+					</div>
+
+					<!-- TUI Footer -->
+					<div class="tui-footer" id="tui-footer-bar">
+						<span class="footer-key">q</span> <span class="footer-desc">beenden</span>  |  
+						<span class="footer-key">tab</span> <span class="footer-desc">kategorie</span>  |  
+						<span class="footer-key">j/k</span> <span class="footer-desc">navigieren</span>  |  
+						<span class="footer-key">enter</span> <span class="footer-desc">kommentare</span>  |  
+						<span class="footer-key">w</span> <span class="footer-desc">posten</span>  |  
+						<span class="footer-key">/</span> <span class="footer-desc">suchen</span>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Features Grid -->
+		<section id="features" class="container features-section">
+			<div class="section-header">
+				<h2 class="section-title">Durchdacht für Developer</h2>
+				<p class="section-desc">Kein Ballast. Nur maximale Effizienz beim Lesen und Interagieren auf Hacker News.</p>
+			</div>
+
+			<div class="features-grid">
+				<!-- Card 1 -->
+				<div class="feature-card">
+					<div class="feature-icon">
+						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+					</div>
+					<h3 class="feature-card-title">Vim-Style Navigation</h3>
+					<p class="feature-card-desc">Bewege dich blitzschnell mit <code>j</code> und <code>k</code> durch die Story-Listen oder wechsle Kategorien direkt mit den Nummerntasten <code>1</code>-<code>5</code>.</p>
+				</div>
+
+				<!-- Card 2 -->
+				<div class="feature-card">
+					<div class="feature-icon">
+						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+					</div>
+					<h3 class="feature-card-title">Visueller Leseverlauf</h3>
+					<p class="feature-card-desc">Einmal gelesene Beiträge werden in der TUI-Liste automatisch ausgegraut und mit einem Haken markiert (gespeichert in der lokalen <code>.hn-history.json</code>).</p>
+				</div>
+
+				<!-- Card 3 -->
+				<div class="feature-card">
+					<div class="feature-icon">
+						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+					</div>
+					<h3 class="feature-card-title">Farblich sortierte Kommentare</h3>
+					<p class="feature-card-desc">Verschachtelte Kommentar-Bäume werden mit farbigen Indentations-Balken gerendert. So erkennst du Diskussionsstränge auf einen Blick.</p>
+				</div>
+
+				<!-- Card 4 -->
+				<div class="feature-card">
+					<div class="feature-icon">
+						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+					</div>
+					<h3 class="feature-card-title">w3m & Vim Integration</h3>
+					<p class="feature-card-desc">Drücke <code>w</code> (Posten) oder <code>r</code> (Antworten) und öffne direkt <code>w3m</code>. Schreibe deinen Text dank w3m-Editor-Integration direkt in Vim/Neovim!</p>
+				</div>
+
+				<!-- Card 5 -->
+				<div class="feature-card">
+					<div class="feature-icon">
+						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+					</div>
+					<h3 class="feature-card-title">Echtzeit-Suche</h3>
+					<p class="feature-card-desc">Drücke <code>/</code>, um die geladene Story-Liste in Echtzeit nach Titeln oder Autoren zu filtern. Drücke <code>x</code>, um den Filter sofort wieder zu löschen.</p>
+				</div>
+
+				<!-- Card 6 -->
+				<div class="feature-card">
+					<div class="feature-icon">
+						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+					</div>
+					<h3 class="feature-card-title">Maus-Scrolling</h3>
+					<p class="feature-card-desc">Auch im Terminal musst du nicht auf die Maus verzichten. Die TUI unterstützt nahtloses Scrollen in Listen und langen Kommentar-Threads per Mausrad.</p>
+				</div>
+			</div>
+		</section>
+
+		<!-- Installation Section -->
+		<section id="installation" class="container installation-section">
+			<div class="section-header">
+				<h2 class="section-title">Schnellstart & Installation</h2>
+				<p class="section-desc">Die einzige Voraussetzung ist eine funktionierende Go-Installation (Version 1.21+).</p>
+			</div>
+
+			<div class="installation-tabs-container">
+				<div class="install-card">
+					<div class="install-header">
+						<span class="install-title">Über Go installieren (Empfohlen)</span>
+					</div>
+					<div class="install-body">
+						<p>Installiere das Binary direkt über den offiziellen Go Toolchain Befehl in dein <code>$GOPATH/bin</code>:</p>
+						<pre class="code-block"><code>go install github.com/aeon022/hn-client@latest</code></pre>
+					</div>
+				</div>
+
+				<div class="install-card">
+					<div class="install-header">
+						<span class="install-title">Aus Source-Code bauen</span>
+					</div>
+					<div class="install-body">
+						<p>Klone das Repository und baue die ausführbare Datei manuell:</p>
+						<pre class="code-block"><code>git clone https://github.com/aeon022/hn-client.git
+cd hn-client
+go build -o hn-client main.go</code></pre>
+					</div>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<!-- Footer -->
+	<footer class="footer">
+		<div class="container footer-container">
+			<p class="footer-copyright">&copy; 2026 hn-client. Open Source lizenziert.</p>
+			<div class="footer-links">
+				<a href="https://github.com/aeon022/hn-client" target="_blank" rel="noopener">GitHub</a>
+				<span class="footer-divider">·</span>
+				<a href="https://news.ycombinator.com" target="_blank" rel="noopener">Hacker News</a>
+			</div>
+		</div>
+	</footer>
+</Layout>
+
+<style>
+	/* Header styles */
+	.header {
+		position: sticky;
+		top: 0;
+		z-index: 100;
+		background: rgba(5, 5, 8, 0.7);
+		backdrop-filter: blur(12px);
+		border-bottom: 1px solid var(--border-color);
+		transition: border-color 0.3s;
+	}
+
+	.header-container {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		height: 70px;
+	}
+
+	.logo {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		text-decoration: none;
+		font-family: 'Outfit', sans-serif;
+	}
+
+	.logo-box {
+		background: var(--hn-orange);
+		color: white;
+		font-weight: 800;
+		font-size: 14px;
+		padding: 3px 6px;
+		border-radius: 4px;
+	}
+
+	.logo-text {
+		color: var(--text-color);
+		font-weight: 700;
+		font-size: 18px;
+		letter-spacing: -0.5px;
+	}
+
+	.cursor-blink {
+		color: var(--hn-orange);
+		animation: blink 1s step-end infinite;
+	}
+
+	@keyframes blink {
+		from, to { opacity: 1; }
+		50% { opacity: 0; }
+	}
+
+	.nav {
+		display: flex;
+		align-items: center;
+		gap: 25px;
+	}
+
+	.nav-link {
+		color: var(--text-muted);
+		text-decoration: none;
+		font-size: 14px;
+		font-weight: 500;
+		transition: color 0.2s;
+	}
+
+	.nav-link:hover {
+		color: var(--text-color);
+	}
+
+	.nav-github {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		background: var(--border-color);
+		color: var(--text-color);
+		text-decoration: none;
+		font-size: 14px;
+		font-weight: 500;
+		padding: 8px 14px;
+		border-radius: 6px;
+		border: 1px solid rgba(255, 255, 255, 0.05);
+		transition: background-color 0.2s, border-color 0.2s;
+	}
+
+	.nav-github:hover {
+		background: rgba(255, 255, 255, 0.05);
+		border-color: var(--hn-orange);
+	}
+
+	/* Hero Section */
+	.hero {
+		text-align: center;
+		padding: 100px 20px 80px;
+		position: relative;
+	}
+
+	.badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		background: rgba(255, 102, 0, 0.05);
+		border: 1px solid var(--hn-orange-glow-strong);
+		padding: 6px 14px;
+		border-radius: 99px;
+		margin-bottom: 25px;
+		animation: pulse-border 3s infinite;
+	}
+
+	@keyframes pulse-border {
+		0%, 100% { border-color: rgba(255, 102, 0, 0.3); }
+		50% { border-color: rgba(255, 102, 0, 0.7); }
+	}
+
+	.badge-dot {
+		width: 6px;
+		height: 6px;
+		background-color: var(--hn-orange);
+		border-radius: 50%;
+		box-shadow: 0 0 8px var(--hn-orange);
+	}
+
+	.badge-text {
+		color: var(--hn-orange);
+		font-size: 12px;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+	}
+
+	.hero-title {
+		font-family: 'Outfit', sans-serif;
+		font-size: 56px;
+		font-weight: 900;
+		line-height: 1.1;
+		letter-spacing: -2px;
+		margin-bottom: 25px;
+	}
+
+	.gradient-text {
+		background: linear-gradient(135deg, var(--hn-orange) 30%, #ff9a00 100%);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+	}
+
+	.hero-subtitle {
+		color: var(--text-muted);
+		font-size: 18px;
+		max-width: 700px;
+		margin: 0 auto 40px;
+		line-height: 1.6;
+	}
+
+	.hero-actions {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 20px;
+	}
+
+	.btn {
+		display: inline-block;
+		text-decoration: none;
+		font-weight: 600;
+		font-size: 15px;
+		padding: 12px 28px;
+		border-radius: 8px;
+		transition: transform 0.2s, box-shadow 0.2s;
+	}
+
+	.btn-primary {
+		background: var(--hn-orange);
+		color: white;
+		box-shadow: 0 4px 20px rgba(255, 102, 0, 0.3);
+	}
+
+	.btn-primary:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 6px 24px rgba(255, 102, 0, 0.45);
+	}
+
+	.install-code-container {
+		display: flex;
+		align-items: center;
+		background: #0b0c13;
+		border: 1px solid var(--border-color);
+		padding: 6px 6px 6px 16px;
+		border-radius: 8px;
+		max-width: 100%;
+		font-family: 'Fira Code', monospace;
+		font-size: 13px;
+	}
+
+	.install-code-container code {
+		color: #e2e8f0;
+		margin-right: 16px;
+		white-space: nowrap;
+		overflow-x: auto;
+	}
+
+	.copy-btn {
+		background: var(--border-color);
+		color: var(--text-color);
+		border: 1px solid rgba(255, 255, 255, 0.05);
+		padding: 8px 16px;
+		border-radius: 6px;
+		cursor: pointer;
+		font-weight: 500;
+		font-size: 12px;
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		transition: background-color 0.2s, border-color 0.2s;
+	}
+
+	.copy-btn:hover {
+		background: rgba(255, 255, 255, 0.05);
+		border-color: var(--hn-orange);
+	}
+
+	/* Glow backgrounds */
+	.hero-glow {
+		position: absolute;
+		top: -150px;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 700px;
+		height: 450px;
+		background: radial-gradient(circle, var(--hn-orange-glow-strong) 0%, transparent 70%);
+		filter: blur(90px);
+		z-index: -1;
+		pointer-events: none;
+	}
+
+	.hero-glow-secondary {
+		position: absolute;
+		top: 150px;
+		left: 10%;
+		width: 400px;
+		height: 400px;
+		background: radial-gradient(circle, rgba(133, 165, 255, 0.08) 0%, transparent 60%);
+		filter: blur(80px);
+		z-index: -1;
+		pointer-events: none;
+	}
+
+	/* Terminal section */
+	.terminal-section {
+		padding: 80px 20px;
+	}
+
+	.section-header {
+		text-align: center;
+		margin-bottom: 50px;
+	}
+
+	.section-title {
+		font-family: 'Outfit', sans-serif;
+		font-size: 38px;
+		font-weight: 800;
+		letter-spacing: -1px;
+		margin-bottom: 12px;
+	}
+
+	.section-desc {
+		color: var(--text-muted);
+		font-size: 16px;
+		max-width: 600px;
+		margin: 0 auto;
+	}
+
+	.terminal-window {
+		background: #08090f;
+		border: 1px solid var(--border-color);
+		border-radius: 12px;
+		box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 102, 0, 0.03);
+		overflow: hidden;
+		max-width: 900px;
+		margin: 0 auto;
+	}
+
+	.terminal-bar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		background: #11131c;
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--border-color);
+	}
+
+	.window-buttons {
+		display: flex;
+		gap: 8px;
+	}
+
+	.win-btn {
+		width: 12px;
+		height: 12px;
+		border-radius: 50%;
+		display: inline-block;
+	}
+
+	.win-close { background-color: #ff5f56; }
+	.win-min { background-color: #ffbd2e; }
+	.win-max { background-color: #27c93f; }
+
+	.window-title {
+		color: var(--text-muted);
+		font-size: 13px;
+		font-family: 'Fira Code', monospace;
+	}
+
+	.window-layout-spacer {
+		width: 52px; /* same as buttons width */
+	}
+
+	.terminal-body {
+		padding: 16px;
+		font-family: 'Fira Code', 'Courier New', monospace;
+		font-size: 14px;
+		line-height: 1.5;
+		color: #e2e8f0;
+	}
+
+	.tui-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 12px;
+	}
+
+	.tui-app-title {
+		background-color: var(--hn-orange);
+		color: white;
+		font-weight: bold;
+		padding: 2px 8px;
+	}
+
+	.tui-tabs {
+		display: flex;
+		gap: 12px;
+	}
+
+	.tui-tab {
+		background: none;
+		border: none;
+		color: var(--gray);
+		font-family: inherit;
+		font-size: 13px;
+		cursor: pointer;
+		padding: 2px 8px;
+		transition: color 0.2s;
+	}
+
+	.tui-tab.active {
+		background-color: var(--hn-orange);
+		color: white;
+		font-weight: bold;
+	}
+
+	.tui-tab:not(.active):hover {
+		color: #ffffff;
+	}
+
+	.tui-divider {
+		height: 1px;
+		background-color: var(--border-color);
+		margin-bottom: 16px;
+	}
+
+	.tui-content {
+		min-height: 280px;
+	}
+
+	.tui-item {
+		display: flex;
+		margin-bottom: 16px;
+		border-left: 2px solid var(--border-color);
+		padding-left: 12px;
+	}
+
+	.tui-item.selected {
+		border-left-color: var(--hn-orange);
+	}
+
+	.tui-item-body {
+		flex-grow: 1;
+	}
+
+	.tui-item-title {
+		font-weight: bold;
+		color: #ffffff;
+		margin-bottom: 4px;
+	}
+
+	.tui-item.selected .tui-item-title {
+		color: var(--hn-orange);
+	}
+
+	.tui-item-meta {
+		font-size: 12px;
+	}
+
+	.meta-pts { color: var(--cyan); }
+	.meta-author { color: var(--hn-orange); }
+	.meta-comments { color: var(--blue); }
+	.meta-time { color: #8892b0; }
+
+	.tui-footer {
+		margin-top: 24px;
+		border-top: 1px solid var(--border-color);
+		padding-top: 12px;
+		color: var(--gray);
+		font-size: 12px;
+	}
+
+	.footer-key {
+		color: var(--hn-orange);
+		font-weight: bold;
+	}
+
+	.footer-desc {
+		color: var(--gray);
+	}
+
+	/* Features section */
+	.features-section {
+		padding: 80px 20px;
+	}
+
+	.features-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: 30px;
+		margin-top: 50px;
+	}
+
+	.feature-card {
+		background: #0b0c13;
+		border: 1px solid var(--border-color);
+		padding: 30px;
+		border-radius: 12px;
+		position: relative;
+		overflow: hidden;
+		transition: border-color 0.3s, transform 0.2s;
+	}
+
+	.feature-card:hover {
+		border-color: var(--hn-orange);
+		transform: translateY(-4px);
+		box-shadow: 0 10px 30px rgba(255, 102, 0, 0.05);
+	}
+
+	.feature-card::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 2px;
+		background: linear-gradient(90deg, transparent, var(--hn-orange), transparent);
+		transform: translateX(-100%);
+		transition: transform 0.5s;
+	}
+
+	.feature-card:hover::before {
+		transform: translateX(100%);
+	}
+
+	.feature-icon {
+		background: rgba(255, 102, 0, 0.08);
+		color: var(--hn-orange);
+		width: 48px;
+		height: 48px;
+		border-radius: 8px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-bottom: 20px;
+		border: 1px solid rgba(255, 102, 0, 0.15);
+	}
+
+	.feature-card-title {
+		font-family: 'Outfit', sans-serif;
+		font-size: 20px;
+		font-weight: 700;
+		margin-bottom: 12px;
+		color: #ffffff;
+	}
+
+	.feature-card-desc {
+		color: var(--text-muted);
+		font-size: 14px;
+		line-height: 1.6;
+	}
+
+	.feature-card code {
+		background: rgba(255, 255, 255, 0.05);
+		padding: 2px 6px;
+		border-radius: 4px;
+		font-family: 'Fira Code', monospace;
+		font-size: 12px;
+		color: #ffffff;
+	}
+
+	/* Installation section */
+	.installation-section {
+		padding: 80px 20px 140px;
+	}
+
+	.installation-tabs-container {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+		gap: 30px;
+		margin-top: 50px;
+		max-width: 900px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.install-card {
+		background: #0b0c13;
+		border: 1px solid var(--border-color);
+		border-radius: 12px;
+		overflow: hidden;
+	}
+
+	.install-header {
+		background: #11131c;
+		padding: 16px 20px;
+		border-bottom: 1px solid var(--border-color);
+	}
+
+	.install-title {
+		font-family: 'Outfit', sans-serif;
+		font-weight: 600;
+		font-size: 15px;
+		color: #ffffff;
+	}
+
+	.install-body {
+		padding: 24px;
+	}
+
+	.install-body p {
+		color: var(--text-muted);
+		font-size: 14px;
+		margin-bottom: 16px;
+		line-height: 1.5;
+	}
+
+	.code-block {
+		background: #050508;
+		border: 1px solid var(--border-color);
+		padding: 14px;
+		border-radius: 6px;
+		font-family: 'Fira Code', monospace;
+		font-size: 12px;
+		color: #e2e8f0;
+		overflow-x: auto;
+		white-space: pre;
+		line-height: 1.6;
+	}
+
+	/* Footer */
+	.footer {
+		border-top: 1px solid var(--border-color);
+		padding: 40px 20px;
+		background: #030305;
+	}
+
+	.footer-container {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 20px;
+	}
+
+	.footer-copyright {
+		color: var(--text-muted);
+		font-size: 13px;
+	}
+
+	.footer-links {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+	}
+
+	.footer-links a {
+		color: var(--text-muted);
+		text-decoration: none;
+		font-size: 13px;
+		transition: color 0.2s;
+	}
+
+	.footer-links a:hover {
+		color: var(--text-color);
+	}
+
+	.footer-divider {
+		color: var(--border-color);
+	}
+
+	/* Layout Container */
+	.container {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding-left: 20px;
+		padding-right: 20px;
+	}
+
+	/* Responsive design */
+	@media (max-width: 768px) {
+		.hero-title {
+			font-size: 40px;
+		}
+		.hero-subtitle {
+			font-size: 16px;
+		}
+		.header-container {
+			flex-direction: column;
+			height: auto;
+			padding: 15px 20px;
+			gap: 15px;
+		}
+		.nav {
+			width: 100%;
+			justify-content: center;
+			flex-wrap: wrap;
+			gap: 15px;
+		}
+		.section-title {
+			font-size: 30px;
+		}
+		.footer-container {
+			flex-direction: column;
+			text-align: center;
+		}
+	}
+</style>
+
+<script>
+	// Mock Hacker News Stories Data
+	const stories = {
+		top: [
+			{ title: "Show HN: hn-client — Hacker News directly in the terminal", pts: 256, author: "gweiher", time: "vor 2 Std.", comments: 32, read: true },
+			{ title: "DuckDB Internals: Why Is DuckDB Fast? (Part 1)", pts: 187, author: "greybeam", time: "vor 11 Std.", comments: 88, read: false },
+			{ title: "Project Valhalla, Explained: How a Decade of Work Arrives in JDK 28", pts: 116, author: "skogstokig", time: "vor 17 Std.", comments: 83, read: false }
+		],
+		new: [
+			{ title: "Show HN: WebGL canvas particles layout", pts: 12, author: "creative_coder", time: "vor 5 Min.", comments: 3, read: false },
+			{ title: "My experience writing Go code without pointers", pts: 45, author: "go_pioneer", time: "vor 48 Min.", comments: 19, read: false },
+			{ title: "Why I still use w3m in 2026", pts: 98, author: "term_guru", time: "vor 1 Std.", comments: 41, read: true }
+		],
+		best: [
+			{ title: "Why Is Apple's Silicon So Fast? (2020)", pts: 894, author: "tech_mind", time: "vor 2 Tagen", comments: 312, read: false },
+			{ title: "Show HN: Are You in the Weights?", pts: 402, author: "turtlesoup", time: "vor 18 Std.", comments: 226, read: false },
+			{ title: "What I learned from reading the UNIX v6 source code", pts: 512, author: "sys_eng", time: "vor 1 Tag", comments: 92, read: true }
+		],
+		ask: [
+			{ title: "Ask HN: What is your favorite terminal tool?", pts: 143, author: "shell_lover", time: "vor 5 Std.", comments: 98, read: false },
+			{ title: "Ask HN: Why did you switch from Python to Go?", pts: 210, author: "py_convert", time: "vor 12 Std.", comments: 154, read: false },
+			{ title: "Ask HN: Best resources to learn Bubble Tea framework?", pts: 87, author: "tui_enthusiast", time: "vor 1 Tag", comments: 22, read: true }
+		],
+		show: [
+			{ title: "Show HN: hn-client — Hacker News directly in the terminal", pts: 256, author: "gweiher", time: "vor 2 Std.", comments: 32, read: true },
+			{ title: "Show HN: Talos – Open-source WASM interpreter for Lean", pts: 69, author: "mfornet", time: "vor 13 Std.", comments: 15, read: false },
+			{ title: "Show HN: Interactive terminal simulator on a landing page", pts: 145, author: "astro_dev", time: "vor 1 Tag", comments: 9, read: false }
+		]
+	};
+
+	// DOM Elements
+	const storiesList = document.getElementById('stories-list');
+	const tabs = document.querySelectorAll('.tui-tab');
+	const tuiFooterBar = document.getElementById('tui-footer-bar');
+
+	// Render stories list
+	function renderCategory(catName) {
+		if (!storiesList) return;
+		storiesList.innerHTML = '';
+		const items = stories[catName];
+
+		items.forEach((item, index) => {
+			const itemDiv = document.createElement('div');
+			itemDiv.className = `tui-item ${index === 0 ? 'selected' : ''}`;
+
+			const readPrefix = item.read ? '✓ ' : '';
+			const itemTitleClass = item.read ? 'style="color: var(--gray);"' : '';
+			
+			// Build metadata string
+			let metaHtml = '';
+			if (item.read && index !== 0) {
+				// Dimmed for read, unselected
+				metaHtml = `<span class="meta-pts" style="color: var(--gray);">${item.pts} pts</span> · <span style="color: var(--gray);">von ${item.author}</span> · <span class="meta-time">${item.time}</span> · <span class="meta-comments" style="color: var(--gray);">${item.comments} Kommentare</span>`;
+			} else {
+				// Regular colored metadata
+				metaHtml = `<span class="meta-pts">${item.pts} pts</span> · von <span class="meta-author">${item.author}</span> · <span class="meta-time">${item.time}</span> · <span class="meta-comments">${item.comments} Kommentare</span>`;
+			}
+
+			itemDiv.innerHTML = `
+				<div class="tui-item-body">
+					<div class="tui-item-title" ${itemTitleClass}>${readPrefix}${item.title}</div>
+					<div class="tui-item-meta">${metaHtml}</div>
+				</div>
+			`;
+			storiesList.appendChild(itemDiv);
+		});
+	}
+
+	// Tab switching event listeners
+	tabs.forEach(tab => {
+		tab.addEventListener('click', () => {
+			tabs.forEach(t => t.classList.remove('active'));
+			tab.classList.add('active');
+			const cat = tab.getAttribute('data-cat');
+			renderCategory(cat);
+		});
+	});
+
+	// Initial render
+	renderCategory('top');
+
+	// Copy to clipboard function
+	const copyBtn = document.getElementById('copy-btn');
+	const copyCommand = document.getElementById('install-command');
+	const copyBtnText = document.getElementById('copy-btn-text');
+
+	if (copyBtn && copyCommand && copyBtnText) {
+		copyBtn.addEventListener('click', () => {
+			const commandText = copyCommand.innerText;
+			navigator.clipboard.writeText(commandText).then(() => {
+				copyBtnText.innerText = 'Kopiert!';
+				copyBtn.style.borderColor = 'var(--green)';
+				copyBtn.style.color = 'var(--green)';
+				setTimeout(() => {
+					copyBtnText.innerText = 'Kopieren';
+					copyBtn.style.borderColor = '';
+					copyBtn.style.color = '';
+				}, 2000);
+			}).catch(err => {
+				console.error('Copy failed: ', err);
+			});
+		});
+	}
+</script>

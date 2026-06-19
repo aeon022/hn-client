@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="de">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="generator" content={Astro.generator} />
+		
+		<title>hn-client — Der ultimative Hacker News Terminal Client</title>
+		<meta name="description" content="Ein moderner, rasend schneller und minimalistischer Hacker News Client direkt für dein Terminal. Vim-Keybindings, Mausrad-Scrolling und persistentem Leseverlauf." />
+
+		<!-- Google Fonts -->
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+	</head>
+	<body>
+		<slot />
+	</body>
+</html>
+
+<style is:global>
+	:root {
+		--bg-color: #050508;
+		--panel-color: #0b0c13;
+		--border-color: #1a1c28;
+		--text-color: #e2e8f0;
+		--text-muted: #8892b0;
+		--hn-orange: #ff6600;
+		--hn-orange-glow: rgba(255, 102, 0, 0.15);
+		--hn-orange-glow-strong: rgba(255, 102, 0, 0.4);
+		--cyan: #00f0ff;
+		--blue: #85a5ff;
+		--green: #adff2f;
+		--gray: #828282;
+	}
+
+	* {
+		box-sizing: border-box;
+		margin: 0;
+		padding: 0;
+	}
+
+	html {
+		scroll-behavior: smooth;
+	}
+
+	body {
+		background-color: var(--bg-color);
+		color: var(--text-color);
+		font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+		min-height: 100vh;
+		overflow-x: hidden;
+		background-image: 
+			linear-gradient(rgba(26, 28, 40, 0.2) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(26, 28, 40, 0.2) 1px, transparent 1px);
+		background-size: 50px 50px;
+		background-position: center top;
+	}
+
+	/* Scrollbar-Design */
+	::-webkit-scrollbar {
+		width: 8px;
+	}
+	::-webkit-scrollbar-track {
+		background: var(--bg-color);
+	}
+	::-webkit-scrollbar-thumb {
+		background: var(--border-color);
+		border-radius: 4px;
+	}
+	::-webkit-scrollbar-thumb:hover {
+		background: var(--hn-orange);
+	}
+</style>
