@@ -920,13 +920,14 @@ func (m model) View() string {
 			formatShortcut("j/k", "nav"),
 			formatShortcut("enter", "view"),
 			formatShortcut("o", "link"),
+			formatShortcut("w", "post"),
 			formatShortcut("/", "search"),
 			formatShortcut("?", "help"),
 		}
 		if m.searchInput.Value() != "" {
 			shortcuts = append(shortcuts, formatShortcut("x", "clear filter"))
 		}
-		footer = footerStyle.Width(m.width).Render(strings.Join(shortcuts, "  |  "))
+		footer = footerStyle.Width(m.width).Render(strings.Join(shortcuts, " | "))
 	} else {
 		shortcuts := []string{
 			formatShortcut("esc/q", "back"),
@@ -935,7 +936,7 @@ func (m model) View() string {
 			formatShortcut("r", "reply"),
 			formatShortcut("?", "help"),
 		}
-		footer = footerStyle.Width(m.width).Render(strings.Join(shortcuts, "  |  "))
+		footer = footerStyle.Width(m.width).Render(strings.Join(shortcuts, " | "))
 	}
 
 	return fmt.Sprintf("%s%s\n%s", header, content, footer)
