@@ -71,6 +71,14 @@ import FooterSignature from '../components/FooterSignature.astro';
 					</button>
 				</div>
 			</div>
+
+			<!-- Hero Image Showcase -->
+			<div class="hero-image-container fade-in-delay-4">
+				<div class="hero-image-wrapper">
+					<img src="/tui_screenshot.jpg" alt="hn-client terminal screenshot" class="hero-image" />
+					<div class="hero-image-glow"></div>
+				</div>
+			</div>
 		</section>
 
 		<!-- Interactive Terminal Mockup -->
@@ -1816,6 +1824,47 @@ go build -o hn-client main.go</code></pre>
 		filter: blur(30px) brightness(1.8) contrast(1.5) hue-rotate(90deg);
 		transform: translateY(-80px) scale(0.96) skewX(10deg);
 		pointer-events: none;
+	}
+
+	/* Hero Image Showcase */
+	.hero-image-container {
+		margin-top: 60px;
+		max-width: 900px;
+		margin-left: auto;
+		margin-right: auto;
+		padding: 0 20px;
+	}
+
+	.hero-image-wrapper {
+		position: relative;
+		border-radius: 12px;
+		overflow: hidden;
+		border: 1px solid var(--border-color);
+		box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 102, 0, 0.05);
+		transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
+	.hero-image-wrapper:hover {
+		transform: translateY(-4px) scale(1.01);
+		box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7), 0 0 50px rgba(255, 102, 0, 0.1);
+		border-color: rgba(255, 102, 0, 0.3);
+	}
+
+	.hero-image {
+		width: 100%;
+		height: auto;
+		display: block;
+	}
+
+	.hero-image-glow {
+		position: absolute;
+		bottom: 0;
+		left: 10%;
+		right: 10%;
+		height: 1px;
+		background: linear-gradient(90deg, transparent, var(--hn-orange), transparent);
+		box-shadow: 0 0 20px 2px var(--hn-orange);
+		opacity: 0.7;
 	}
 </style>
 
