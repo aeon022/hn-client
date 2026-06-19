@@ -1,8 +1,24 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import FooterSignature from '../components/FooterSignature.astro';
 ---
 
 <Layout>
+	<!-- System Boot Preloader -->
+	<div id="system-preloader" class="preloader">
+		<div class="preloader-content">
+			<div class="preloader-lines">
+				<div class="preloader-line line-1">❯ booting hn-client kernel...</div>
+				<div class="preloader-line line-2">❯ loading Bubble Tea & Lip Gloss...</div>
+				<div class="preloader-line line-3">❯ initializing terminal interface...</div>
+				<div class="preloader-line line-4">❯ status: ok (ready to read)</div>
+			</div>
+			<div class="preloader-progress-bar">
+				<div class="preloader-progress-fill"></div>
+			</div>
+		</div>
+	</div>
+
 	<!-- Hero Background Glows -->
 	<div class="hero-glow"></div>
 	<div class="hero-glow-secondary"></div>
@@ -29,38 +45,38 @@ import Layout from '../layouts/Layout.astro';
 	<main class="main">
 		<!-- Hero Section -->
 		<section class="hero container">
-			<div class="badge">
+			<div class="badge fade-in-delay-1">
 				<span class="badge-dot"></span>
-				<span class="badge-text">Version 1.0.0 Jetzt Verfügbar</span>
+				<span class="badge-text">Version 1.0.0 Now Available</span>
 			</div>
-			<h1 class="hero-title">
+			<h1 class="hero-title fade-in-delay-2">
 				Hacker News. <br />
-				<span class="gradient-text">Direkt in deinem Terminal.</span>
+				<span class="gradient-text">Directly in your terminal.</span>
 			</h1>
-			<p class="hero-subtitle">
-				Ein moderner, rasend schneller und minimalistischer Client. Entwickelt in Go mit Bubble Tea & Lip Gloss. Bietet intuitive Vim-Navigation, Maus-Scrolling und nahtlose w3m/Vim-Schreibintegration.
+			<p class="hero-subtitle fade-in-delay-3">
+				A modern, blazing fast, and minimalist client. Built in Go with Bubble Tea & Lip Gloss. Features intuitive Vim navigation, mouse-wheel scrolling, and seamless w3m/Vim writing integration.
 			</p>
 
-			<div class="hero-actions">
-				<a href="#installation" class="btn btn-primary">Jetzt installieren</a>
+			<div class="hero-actions fade-in-delay-4">
+				<a href="#installation" class="btn btn-primary">Get Started</a>
 				<div class="install-code-container">
 					<code id="install-command">go install github.com/aeon022/hn-client@latest</code>
-					<button id="copy-btn" class="copy-btn" title="In Zwischenablage kopieren">
+					<button id="copy-btn" class="copy-btn" title="Copy to clipboard">
 						<svg id="copy-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-						<span id="copy-btn-text">Kopieren</span>
+						<span id="copy-btn-text">Copy</span>
 					</button>
 				</div>
 			</div>
 		</section>
 
 		<!-- Interactive Terminal Mockup -->
-		<section id="terminal-demo" class="container terminal-section">
+		<section id="terminal-demo" class="container terminal-section reveal">
 			<div class="section-header">
-				<h2 class="section-title">Erlebe die TUI im Browser</h2>
-				<p class="section-desc">Klicke auf die Tabs im Mockup, um zwischen den echten Hacker News Kategorien zu wechseln.</p>
+				<h2 class="section-title">Try the TUI in your browser</h2>
+				<p class="section-desc">Click on the categories inside the simulator to switch Hacker News feeds in real time.</p>
 			</div>
 
-			<div class="terminal-window">
+			<div class="terminal-window" tabindex="0" id="tui-window" title="Click to use keyboard shortcuts (j/k/Enter/Tab/1-5/q)">
 				<!-- Window Title Bar -->
 				<div class="terminal-bar">
 					<div class="window-buttons">
@@ -69,7 +85,10 @@ import Layout from '../layouts/Layout.astro';
 						<span class="win-btn win-max"></span>
 					</div>
 					<div class="window-title">go (w3m) — hn-client</div>
-					<div class="window-layout-spacer"></div>
+					<div class="window-status" id="tui-status">
+						<span class="status-dot"></span>
+						<span class="status-text">Interactive TUI (Click to focus)</span>
+					</div>
 				</div>
 
 				<!-- Terminal Body -->
@@ -90,37 +109,37 @@ import Layout from '../layouts/Layout.astro';
 
 					<!-- TUI Content (Stories List) -->
 					<div class="tui-content" id="stories-list">
-						<!-- Will be filled dynamically by JavaScript -->
+						<!-- Filled dynamically by JS -->
 					</div>
 
 					<!-- TUI Footer -->
 					<div class="tui-footer" id="tui-footer-bar">
-						<span class="footer-key">q</span> <span class="footer-desc">beenden</span>  |  
-						<span class="footer-key">tab</span> <span class="footer-desc">kategorie</span>  |  
-						<span class="footer-key">j/k</span> <span class="footer-desc">navigieren</span>  |  
-						<span class="footer-key">enter</span> <span class="footer-desc">kommentare</span>  |  
-						<span class="footer-key">w</span> <span class="footer-desc">posten</span>  |  
-						<span class="footer-key">/</span> <span class="footer-desc">suchen</span>
+						<span class="footer-key">q</span> <span class="footer-desc">quit</span>  |  
+						<span class="footer-key">tab</span> <span class="footer-desc">category</span>  |  
+						<span class="footer-key">j/k</span> <span class="footer-desc">navigate</span>  |  
+						<span class="footer-key">enter</span> <span class="footer-desc">comments</span>  |  
+						<span class="footer-key">w</span> <span class="footer-desc">post</span>  |  
+						<span class="footer-key">/</span> <span class="footer-desc">search</span>
 					</div>
 				</div>
 			</div>
 		</section>
 
 		<!-- Features Grid -->
-		<section id="features" class="container features-section">
+		<section id="features" class="container features-section reveal">
 			<div class="section-header">
-				<h2 class="section-title">Durchdacht für Developer</h2>
-				<p class="section-desc">Kein Ballast. Nur maximale Effizienz beim Lesen und Interagieren auf Hacker News.</p>
+				<h2 class="section-title">Designed for Developers</h2>
+				<p class="section-desc">Zero bloat. Only maximum efficiency when reading, searching, and submitting to Hacker News.</p>
 			</div>
 
-			<div class="features-grid">
+			<div class="features-grid reveal reveal-stagger">
 				<!-- Card 1 -->
 				<div class="feature-card">
 					<div class="feature-icon">
 						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
 					</div>
 					<h3 class="feature-card-title">Vim-Style Navigation</h3>
-					<p class="feature-card-desc">Bewege dich blitzschnell mit <code>j</code> und <code>k</code> durch die Story-Listen oder wechsle Kategorien direkt mit den Nummerntasten <code>1</code>-<code>5</code>.</p>
+					<p class="feature-card-desc">Navigate lists naturally with <code>j</code> and <code>k</code> keys. Jump straight to feed categories instantly using number hotkeys <code>1</code>-<code>5</code>.</p>
 				</div>
 
 				<!-- Card 2 -->
@@ -128,8 +147,8 @@ import Layout from '../layouts/Layout.astro';
 					<div class="feature-icon">
 						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
 					</div>
-					<h3 class="feature-card-title">Visueller Leseverlauf</h3>
-					<p class="feature-card-desc">Einmal gelesene Beiträge werden in der TUI-Liste automatisch ausgegraut und mit einem Haken markiert (gespeichert in der lokalen <code>.hn-history.json</code>).</p>
+					<h3 class="feature-card-title">Visual Read History</h3>
+					<p class="feature-card-desc">Previously visited stories are automatically dimmed in the TUI and tagged with a checkmark, persisted securely in your local <code>.hn-history.json</code>.</p>
 				</div>
 
 				<!-- Card 3 -->
@@ -137,8 +156,8 @@ import Layout from '../layouts/Layout.astro';
 					<div class="feature-icon">
 						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
 					</div>
-					<h3 class="feature-card-title">Farblich sortierte Kommentare</h3>
-					<p class="feature-card-desc">Verschachtelte Kommentar-Bäume werden mit farbigen Indentations-Balken gerendert. So erkennst du Diskussionsstränge auf einen Blick.</p>
+					<h3 class="feature-card-title">Color-Coded Comment Trees</h3>
+					<p class="feature-card-desc">Deeply nested comment trees render with color-coded sidebar lines corresponding to their depth. Follow complex conversations effortlessly.</p>
 				</div>
 
 				<!-- Card 4 -->
@@ -147,7 +166,7 @@ import Layout from '../layouts/Layout.astro';
 						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
 					</div>
 					<h3 class="feature-card-title">w3m & Vim Integration</h3>
-					<p class="feature-card-desc">Drücke <code>w</code> (Posten) oder <code>r</code> (Antworten) und öffne direkt <code>w3m</code>. Schreibe deinen Text dank w3m-Editor-Integration direkt in Vim/Neovim!</p>
+					<p class="feature-card-desc">Press <code>w</code> (post) or <code>r</code> (reply) to launch <code>w3m</code>. Write posts directly using your system's Vim/Neovim configuration.</p>
 				</div>
 
 				<!-- Card 5 -->
@@ -155,8 +174,8 @@ import Layout from '../layouts/Layout.astro';
 					<div class="feature-icon">
 						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
 					</div>
-					<h3 class="feature-card-title">Echtzeit-Suche</h3>
-					<p class="feature-card-desc">Drücke <code>/</code>, um die geladene Story-Liste in Echtzeit nach Titeln oder Autoren zu filtern. Drücke <code>x</code>, um den Filter sofort wieder zu löschen.</p>
+					<h3 class="feature-card-title">Instant Search Filtering</h3>
+					<p class="feature-card-desc">Press <code>/</code> to filter the active story list in real time by title or author. Clear the active search immediately by pressing <code>x</code>.</p>
 				</div>
 
 				<!-- Card 6 -->
@@ -164,36 +183,36 @@ import Layout from '../layouts/Layout.astro';
 					<div class="feature-icon">
 						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
 					</div>
-					<h3 class="feature-card-title">Maus-Scrolling</h3>
-					<p class="feature-card-desc">Auch im Terminal musst du nicht auf die Maus verzichten. Die TUI unterstützt nahtloses Scrollen in Listen und langen Kommentar-Threads per Mausrad.</p>
+					<h3 class="feature-card-title">Mouse-Wheel Support</h3>
+					<p class="feature-card-desc">No need to abandon the mouse. The terminal client supports seamless scrolling inside lists and comment threads using the mouse scroll-wheel.</p>
 				</div>
 			</div>
 		</section>
 
 		<!-- Installation Section -->
-		<section id="installation" class="container installation-section">
+		<section id="installation" class="container installation-section reveal">
 			<div class="section-header">
-				<h2 class="section-title">Schnellstart & Installation</h2>
-				<p class="section-desc">Die einzige Voraussetzung ist eine funktionierende Go-Installation (Version 1.21+).</p>
+				<h2 class="section-title">Quickstart & Installation</h2>
+				<p class="section-desc">The only requirement is a working Go toolchain (Version 1.21 or higher) installed on your system.</p>
 			</div>
 
-			<div class="installation-tabs-container">
+			<div class="installation-tabs-container reveal reveal-stagger">
 				<div class="install-card">
 					<div class="install-header">
-						<span class="install-title">Über Go installieren (Empfohlen)</span>
+						<span class="install-title">Install via Go (Recommended)</span>
 					</div>
 					<div class="install-body">
-						<p>Installiere das Binary direkt über den offiziellen Go Toolchain Befehl in dein <code>$GOPATH/bin</code>:</p>
+						<p>Install the binary directly into your <code>$GOPATH/bin</code> using the official Go toolchain:</p>
 						<pre class="code-block"><code>go install github.com/aeon022/hn-client@latest</code></pre>
 					</div>
 				</div>
 
 				<div class="install-card">
 					<div class="install-header">
-						<span class="install-title">Aus Source-Code bauen</span>
+						<span class="install-title">Build from Source</span>
 					</div>
 					<div class="install-body">
-						<p>Klone das Repository und baue die ausführbare Datei manuell:</p>
+						<p>Clone the repository and build the executable file manually on your system:</p>
 						<pre class="code-block"><code>git clone https://github.com/aeon022/hn-client.git
 cd hn-client
 go build -o hn-client main.go</code></pre>
@@ -206,7 +225,7 @@ go build -o hn-client main.go</code></pre>
 	<!-- Footer -->
 	<footer class="footer">
 		<div class="container footer-container">
-			<p class="footer-copyright">&copy; 2026 hn-client. Open Source lizenziert.</p>
+			<p class="footer-copyright">&copy; 2026 hn-client. Open source licensed.</p>
 			<div class="footer-links">
 				<a href="https://github.com/aeon022/hn-client" target="_blank" rel="noopener">GitHub</a>
 				<span class="footer-divider">·</span>
@@ -214,6 +233,9 @@ go build -o hn-client main.go</code></pre>
 			</div>
 		</div>
 	</footer>
+
+	<!-- Abteilung 83 Signature -->
+	<FooterSignature />
 </Layout>
 
 <style>
@@ -307,10 +329,22 @@ go build -o hn-client main.go</code></pre>
 		border-color: var(--hn-orange);
 	}
 
+	/* Page Load Animation (Hero Section) */
+	@keyframes fadeInUp {
+		from {
+			opacity: 0;
+			transform: translateY(30px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
 	/* Hero Section */
 	.hero {
 		text-align: center;
-		padding: 100px 20px 80px;
+		padding: 120px 20px 80px;
 		position: relative;
 	}
 
@@ -324,6 +358,58 @@ go build -o hn-client main.go</code></pre>
 		border-radius: 99px;
 		margin-bottom: 25px;
 		animation: pulse-border 3s infinite;
+		opacity: 0;
+	}
+
+	.hero-title {
+		font-family: 'Outfit', sans-serif;
+		font-size: 58px;
+		font-weight: 900;
+		line-height: 1.1;
+		letter-spacing: -2px;
+		margin-bottom: 25px;
+		opacity: 0;
+	}
+
+	.gradient-text {
+		background: linear-gradient(135deg, var(--hn-orange) 30%, #ff9a00 100%);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+	}
+
+	.hero-subtitle {
+		color: var(--text-muted);
+		font-size: 18px;
+		max-width: 700px;
+		margin: 0 auto 40px;
+		line-height: 1.6;
+		opacity: 0;
+	}
+
+	.hero-actions {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 20px;
+		opacity: 0;
+	}
+
+	/* Page load delay timing classes */
+	.fade-in-delay-1 {
+		animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+		animation-delay: 0.1s;
+	}
+	.fade-in-delay-2 {
+		animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+		animation-delay: 0.25s;
+	}
+	.fade-in-delay-3 {
+		animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+		animation-delay: 0.4s;
+	}
+	.fade-in-delay-4 {
+		animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+		animation-delay: 0.55s;
 	}
 
 	@keyframes pulse-border {
@@ -345,36 +431,6 @@ go build -o hn-client main.go</code></pre>
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.5px;
-	}
-
-	.hero-title {
-		font-family: 'Outfit', sans-serif;
-		font-size: 56px;
-		font-weight: 900;
-		line-height: 1.1;
-		letter-spacing: -2px;
-		margin-bottom: 25px;
-	}
-
-	.gradient-text {
-		background: linear-gradient(135deg, var(--hn-orange) 30%, #ff9a00 100%);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-	}
-
-	.hero-subtitle {
-		color: var(--text-muted);
-		font-size: 18px;
-		max-width: 700px;
-		margin: 0 auto 40px;
-		line-height: 1.6;
-	}
-
-	.hero-actions {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 20px;
 	}
 
 	.btn {
@@ -463,6 +519,18 @@ go build -o hn-client main.go</code></pre>
 		pointer-events: none;
 	}
 
+	/* Scroll Reveal Effect Classes */
+	.reveal {
+		opacity: 0;
+		transform: translateY(40px);
+		transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
+	.reveal.visible {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
 	/* Terminal section */
 	.terminal-section {
 		padding: 80px 20px;
@@ -530,7 +598,7 @@ go build -o hn-client main.go</code></pre>
 	}
 
 	.window-layout-spacer {
-		width: 52px; /* same as buttons width */
+		width: 52px;
 	}
 
 	.terminal-body {
@@ -858,42 +926,453 @@ go build -o hn-client main.go</code></pre>
 			text-align: center;
 		}
 	}
+
+	/* System Preloader */
+	.preloader {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100vw;
+		height: 100vh;
+		background: #020204;
+		z-index: 9999;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		font-family: 'Fira Code', monospace;
+		transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.6s;
+	}
+
+	.preloader.fade-out {
+		opacity: 0;
+		visibility: hidden;
+		pointer-events: none;
+	}
+
+	.preloader-content {
+		width: 90%;
+		max-width: 450px;
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+	}
+
+	.preloader-lines {
+		font-size: 13px;
+		color: #3f3f46;
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.preloader-line {
+		overflow: hidden;
+		white-space: nowrap;
+		width: 0;
+		display: flex;
+		align-items: center;
+	}
+
+	/* Animation delays for lines typing */
+	.preloader-line.line-1 {
+		animation: typeLine 0.4s steps(30, end) forwards;
+		color: #8892b0;
+	}
+	.preloader-line.line-2 {
+		animation: typeLine 0.4s steps(30, end) forwards;
+		animation-delay: 0.3s;
+		color: #8892b0;
+	}
+	.preloader-line.line-3 {
+		animation: typeLine 0.4s steps(35, end) forwards;
+		animation-delay: 0.6s;
+		color: #8892b0;
+	}
+	.preloader-line.line-4 {
+		animation: typeLine 0.3s steps(20, end) forwards;
+		animation-delay: 0.9s;
+		color: var(--hn-orange);
+		font-weight: bold;
+	}
+
+	@keyframes typeLine {
+		from { width: 0; }
+		to { width: 100%; }
+	}
+
+	.preloader-progress-bar {
+		width: 100%;
+		height: 3px;
+		background: rgba(255, 255, 255, 0.03);
+		border-radius: 2px;
+		overflow: hidden;
+		border: 1px solid rgba(255, 255, 255, 0.05);
+	}
+
+	.preloader-progress-fill {
+		width: 0%;
+		height: 100%;
+		background: var(--hn-orange);
+		box-shadow: 0 0 10px var(--hn-orange);
+		animation: progressFill 1.1s cubic-bezier(0.1, 0.85, 0.25, 1) forwards;
+	}
+
+	@keyframes progressFill {
+		0% { width: 0%; }
+		100% { width: 100%; }
+	}
+
+	/* Interactive Terminal Mockup Enhancements */
+	.terminal-window {
+		outline: none;
+		transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+	}
+
+	.terminal-window:focus-within {
+		border-color: var(--hn-orange);
+		box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 102, 0, 0.06);
+	}
+
+	.window-status {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 11px;
+		color: var(--hn-orange);
+		font-family: 'Fira Code', monospace;
+		background: rgba(255, 102, 0, 0.08);
+		border: 1px solid rgba(255, 102, 0, 0.2);
+		padding: 2px 8px;
+		border-radius: 4px;
+		animation: statusPulse 2s ease-in-out infinite;
+	}
+
+	@keyframes statusPulse {
+		0%, 100% { opacity: 0.8; }
+		50% { opacity: 1; border-color: rgba(255, 102, 0, 0.4); }
+	}
+
+	.status-dot {
+		width: 6px;
+		height: 6px;
+		background-color: var(--hn-orange);
+		border-radius: 50%;
+		box-shadow: 0 0 6px var(--hn-orange);
+		animation: blink 1s step-end infinite;
+	}
+
+	/* Scroll Reveal Stagger */
+	.reveal-stagger > * {
+		opacity: 0;
+		transform: translateY(20px);
+		transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
+	.reveal.visible .reveal-stagger > *:text-color { opacity: 1; transform: translateY(0); }
+	.reveal.visible .reveal-stagger > *:nth-child(1) { transition-delay: 0.05s; opacity: 1; transform: translateY(0); }
+	.reveal.visible .reveal-stagger > *:nth-child(2) { transition-delay: 0.15s; opacity: 1; transform: translateY(0); }
+	.reveal.visible .reveal-stagger > *:nth-child(3) { transition-delay: 0.25s; opacity: 1; transform: translateY(0); }
+	.reveal.visible .reveal-stagger > *:nth-child(4) { transition-delay: 0.35s; opacity: 1; transform: translateY(0); }
+	.reveal.visible .reveal-stagger > *:nth-child(5) { transition-delay: 0.45s; opacity: 1; transform: translateY(0); }
+	.reveal.visible .reveal-stagger > *:nth-child(6) { transition-delay: 0.55s; opacity: 1; transform: translateY(0); }
+
+	/* Spotlight radial background glow for cards */
+	.feature-card {
+		position: relative;
+		z-index: 1;
+	}
+
+	.feature-card::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: radial-gradient(
+			300px circle at var(--mouse-x, 0) var(--mouse-y, 0),
+			rgba(255, 102, 0, 0.04),
+			transparent 80%
+		);
+		opacity: 0;
+		transition: opacity 0.3s;
+		pointer-events: none;
+		z-index: -1;
+	}
+
+	.feature-card:hover::after {
+		opacity: 1;
+	}
+
+	/* Comments tree view inside TUI */
+	.tui-comments-container {
+		padding: 4px 0;
+		font-family: inherit;
+		overflow-y: auto;
+		max-height: 280px;
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	/* Custom TUI scrollbar */
+	.tui-comments-container::-webkit-scrollbar {
+		width: 6px;
+	}
+	.tui-comments-container::-webkit-scrollbar-track {
+		background: rgba(255, 255, 255, 0.02);
+	}
+	.tui-comments-container::-webkit-scrollbar-thumb {
+		background: var(--border-color);
+		border-radius: 3px;
+	}
+	.tui-comments-container::-webkit-scrollbar-thumb:hover {
+		background: var(--hn-orange);
+	}
+
+	.tui-comments-header {
+		border-bottom: 1px dashed var(--border-color);
+		padding-bottom: 10px;
+		margin-bottom: 4px;
+	}
+
+	.tui-back-button {
+		color: var(--hn-orange);
+		cursor: pointer;
+		font-weight: bold;
+		margin-bottom: 6px;
+		user-select: none;
+		font-size: 13px;
+		display: inline-block;
+	}
+
+	.tui-back-button:hover {
+		text-decoration: underline;
+	}
+
+	.tui-comment-story-title {
+		font-weight: bold;
+		color: #ffffff;
+		font-size: 14px;
+	}
+
+	.tui-comments-list {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	.tui-comment-item {
+		font-size: 13px;
+		position: relative;
+	}
+
+	.tui-comment-meta {
+		margin-bottom: 4px;
+		font-size: 11px;
+		color: var(--gray);
+	}
+
+	.tui-comment-body {
+		color: #cbd5e1;
+		line-height: 1.4;
+	}
 </style>
 
 <script>
-	// Mock Hacker News Stories Data
+	// Mock Hacker News Stories Data with Nested Comments
 	const stories = {
 		top: [
-			{ title: "Show HN: hn-client — Hacker News directly in the terminal", pts: 256, author: "gweiher", time: "vor 2 Std.", comments: 32, read: true },
-			{ title: "DuckDB Internals: Why Is DuckDB Fast? (Part 1)", pts: 187, author: "greybeam", time: "vor 11 Std.", comments: 88, read: false },
-			{ title: "Project Valhalla, Explained: How a Decade of Work Arrives in JDK 28", pts: 116, author: "skogstokig", time: "vor 17 Std.", comments: 83, read: false }
+			{
+				title: "Show HN: hn-client — Hacker News directly in the terminal",
+				pts: 256,
+				author: "gweiher",
+				time: "2h ago",
+				comments: 32,
+				read: true,
+				commentsList: [
+					{ author: "linus_t", text: "This is exactly what I've been waiting for. No web bloat, just pure Vim keybindings. The w3m integration for comments/replies works beautifully.", depth: 0, time: "1h ago" },
+					{ author: "gweiher", text: "Thanks! I built it precisely to scratch my own itch. Let me know if you run into any issues.", depth: 1, time: "45m ago" },
+					{ author: "go_dev", text: "Very nice codebase structure. Bubble Tea is perfect for this.", depth: 1, time: "30m ago" },
+					{ author: "hacker99", text: "Are there any plans for a Homebrew formula?", depth: 2, time: "15m ago" }
+				]
+			},
+			{
+				title: "DuckDB Internals: Why Is DuckDB Fast? (Part 1)",
+				pts: 187,
+				author: "greybeam",
+				time: "11h ago",
+				comments: 88,
+				read: false,
+				commentsList: [
+					{ author: "db_junkie", text: "Vectorized execution and lean memory management. The architectural breakdown is top tier.", depth: 0, time: "9h ago" },
+					{ author: "greybeam", text: "Glad you liked it! Part 2 will cover the storage engine details.", depth: 1, time: "8h ago" }
+				]
+			},
+			{
+				title: "Project Valhalla, Explained: How a Decade of Work Arrives in JDK 28",
+				pts: 116,
+				author: "skogstokig",
+				time: "17h ago",
+				comments: 83,
+				read: false,
+				commentsList: [
+					{ author: "java_wizard", text: "Value types and primitive class types are going to revolutionize memory efficiency in Java.", depth: 0, time: "15h ago" }
+				]
+			}
 		],
 		new: [
-			{ title: "Show HN: WebGL canvas particles layout", pts: 12, author: "creative_coder", time: "vor 5 Min.", comments: 3, read: false },
-			{ title: "My experience writing Go code without pointers", pts: 45, author: "go_pioneer", time: "vor 48 Min.", comments: 19, read: false },
-			{ title: "Why I still use w3m in 2026", pts: 98, author: "term_guru", time: "vor 1 Std.", comments: 41, read: true }
+			{
+				title: "Show HN: WebGL canvas particles layout",
+				pts: 12,
+				author: "creative_coder",
+				time: "5m ago",
+				comments: 3,
+				read: false,
+				commentsList: [
+					{ author: "canvas_fan", text: "Nice animations! FPS is very stable even on my older machine.", depth: 0, time: "3m ago" }
+				]
+			},
+			{
+				title: "My experience writing Go code without pointers",
+				pts: 45,
+				author: "go_pioneer",
+				time: "48m ago",
+				comments: 19,
+				read: false,
+				commentsList: [
+					{ author: "pointer_guru", text: "Passing values by copy can have overhead, but it eliminates escape analysis issues. Interesting take.", depth: 0, time: "30m ago" }
+				]
+			},
+			{
+				title: "Why I still use w3m in 2026",
+				pts: 98,
+				author: "term_guru",
+				time: "1h ago",
+				comments: 41,
+				read: true,
+				commentsList: [
+					{ author: "vi_keys", text: "Vim-like keys and text-only rendering makes reading documentation so fast.", depth: 0, time: "45m ago" }
+				]
+			}
 		],
 		best: [
-			{ title: "Why Is Apple's Silicon So Fast? (2020)", pts: 894, author: "tech_mind", time: "vor 2 Tagen", comments: 312, read: false },
-			{ title: "Show HN: Are You in the Weights?", pts: 402, author: "turtlesoup", time: "vor 18 Std.", comments: 226, read: false },
-			{ title: "What I learned from reading the UNIX v6 source code", pts: 512, author: "sys_eng", time: "vor 1 Tag", comments: 92, read: true }
+			{
+				title: "Why Is Apple's Silicon So Fast? (2020)",
+				pts: 894,
+				author: "tech_mind",
+				time: "2d ago",
+				comments: 312,
+				read: false,
+				commentsList: [
+					{ author: "m1_max", text: "The unified memory architecture and wide decoder design are the key secrets.", depth: 0, time: "1d ago" }
+				]
+			},
+			{
+				title: "Show HN: Are You in the Weights?",
+				pts: 402,
+				author: "turtlesoup",
+				time: "18h ago",
+				comments: 226,
+				read: false,
+				commentsList: [
+					{ author: "llm_researcher", text: "Fascinating visualization of neural net weights. Highly recommend viewing.", depth: 0, time: "12h ago" }
+				]
+			},
+			{
+				title: "What I learned from reading the UNIX v6 source code",
+				pts: 512,
+				author: "sys_eng",
+				time: "1d ago",
+				comments: 92,
+				read: true,
+				commentsList: [
+					{ author: "retro_code", text: "The simplicity of the scheduler code in v6 is a masterclass in software engineering.", depth: 0, time: "20h ago" }
+				]
+			}
 		],
 		ask: [
-			{ title: "Ask HN: What is your favorite terminal tool?", pts: 143, author: "shell_lover", time: "vor 5 Std.", comments: 98, read: false },
-			{ title: "Ask HN: Why did you switch from Python to Go?", pts: 210, author: "py_convert", time: "vor 12 Std.", comments: 154, read: false },
-			{ title: "Ask HN: Best resources to learn Bubble Tea framework?", pts: 87, author: "tui_enthusiast", time: "vor 1 Tag", comments: 22, read: true }
+			{
+				title: "Ask HN: What is your favorite terminal tool?",
+				pts: 143,
+				author: "shell_lover",
+				time: "5h ago",
+				comments: 98,
+				read: false,
+				commentsList: [
+					{ author: "fzf_enjoyer", text: "fzf is definitely life-changing. Combined with fd and ripgrep, it makes file searching instant.", depth: 0, time: "4h ago" }
+				]
+			},
+			{
+				title: "Ask HN: Why did you switch from Python to Go?",
+				pts: 210,
+				author: "py_convert",
+				time: "12h ago",
+				comments: 154,
+				read: false,
+				commentsList: [
+					{ author: "speedy_go", text: "Static binaries, compilation speed, and stellar concurrency primitives did it for me.", depth: 0, time: "11h ago" }
+				]
+			},
+			{
+				title: "Ask HN: Best resources to learn Bubble Tea framework?",
+				pts: 87,
+				author: "tui_enthusiast",
+				time: "1d ago",
+				comments: 22,
+				read: true,
+				commentsList: [
+					{ author: "bubble_wrap", text: "The examples folder in the charmbracelet/bubbletea repo is by far the best documentation.", depth: 0, time: "18h ago" }
+				]
+			}
 		],
 		show: [
-			{ title: "Show HN: hn-client — Hacker News directly in the terminal", pts: 256, author: "gweiher", time: "vor 2 Std.", comments: 32, read: true },
-			{ title: "Show HN: Talos – Open-source WASM interpreter for Lean", pts: 69, author: "mfornet", time: "vor 13 Std.", comments: 15, read: false },
-			{ title: "Show HN: Interactive terminal simulator on a landing page", pts: 145, author: "astro_dev", time: "vor 1 Tag", comments: 9, read: false }
+			{
+				title: "Show HN: hn-client — Hacker News directly in the terminal",
+				pts: 256,
+				author: "gweiher",
+				time: "2h ago",
+				comments: 32,
+				read: true,
+				commentsList: [
+					{ author: "linus_t", text: "This is exactly what I've been waiting for. No web bloat, just pure Vim keybindings. The w3m integration for comments/replies works beautifully.", depth: 0, time: "1h ago" }
+				]
+			},
+			{
+				title: "Show HN: Talos – Open-source WASM interpreter for Lean",
+				pts: 69,
+				author: "mfornet",
+				time: "13h ago",
+				comments: 15,
+				read: false,
+				commentsList: [
+					{ author: "lean_user", text: "Very exciting! Running Lean interactively in WASM has lots of potential for theorem proving on the web.", depth: 0, time: "10h ago" }
+				]
+			},
+			{
+				title: "Show HN: Interactive terminal simulator on a landing page",
+				pts: 145,
+				author: "astro_dev",
+				time: "1d ago",
+				comments: 9,
+				read: false,
+				commentsList: [
+					{ author: "tui_crafter", text: "I love that the simulator actually reacts to keyboard inputs. Really sets the demo apart.", depth: 0, time: "18h ago" }
+				]
+			}
 		]
 	};
+
+	// State Variables
+	let activeCategory = 'top';
+	let selectedIndex = 0;
+	let inCommentsView = false;
 
 	// DOM Elements
 	const storiesList = document.getElementById('stories-list');
 	const tabs = document.querySelectorAll('.tui-tab');
-	const tuiFooterBar = document.getElementById('tui-footer-bar');
+	const tuiWindow = document.getElementById('tui-window');
+	const tuiStatusText = document.querySelector('#tui-status .status-text');
 
 	// Render stories list
 	function renderCategory(catName) {
@@ -903,19 +1382,17 @@ go build -o hn-client main.go</code></pre>
 
 		items.forEach((item, index) => {
 			const itemDiv = document.createElement('div');
-			itemDiv.className = `tui-item ${index === 0 ? 'selected' : ''}`;
+			itemDiv.className = `tui-item ${index === selectedIndex ? 'selected' : ''}`;
 
 			const readPrefix = item.read ? '✓ ' : '';
 			const itemTitleClass = item.read ? 'style="color: var(--gray);"' : '';
 			
 			// Build metadata string
 			let metaHtml = '';
-			if (item.read && index !== 0) {
-				// Dimmed for read, unselected
-				metaHtml = `<span class="meta-pts" style="color: var(--gray);">${item.pts} pts</span> · <span style="color: var(--gray);">von ${item.author}</span> · <span class="meta-time">${item.time}</span> · <span class="meta-comments" style="color: var(--gray);">${item.comments} Kommentare</span>`;
+			if (item.read && index !== selectedIndex) {
+				metaHtml = `<span class="meta-pts" style="color: var(--gray);">${item.pts} pts</span> · <span style="color: var(--gray);">by ${item.author}</span> · <span class="meta-time">${item.time}</span> · <span class="meta-comments" style="color: var(--gray);">${item.comments} comments</span>`;
 			} else {
-				// Regular colored metadata
-				metaHtml = `<span class="meta-pts">${item.pts} pts</span> · von <span class="meta-author">${item.author}</span> · <span class="meta-time">${item.time}</span> · <span class="meta-comments">${item.comments} Kommentare</span>`;
+				metaHtml = `<span class="meta-pts">${item.pts} pts</span> · by <span class="meta-author">${item.author}</span> · <span class="meta-time">${item.time}</span> · <span class="meta-comments">${item.comments} comments</span>`;
 			}
 
 			itemDiv.innerHTML = `
@@ -924,22 +1401,242 @@ go build -o hn-client main.go</code></pre>
 					<div class="tui-item-meta">${metaHtml}</div>
 				</div>
 			`;
+
+			itemDiv.addEventListener('click', () => {
+				if (selectedIndex === index) {
+					// Second click opens comments
+					showComments(item);
+				} else {
+					selectedIndex = index;
+					updateSelection();
+				}
+			});
+
 			storiesList.appendChild(itemDiv);
 		});
 	}
 
-	// Tab switching event listeners
+	// Update selection class and scroll into view
+	function updateSelection() {
+		if (!storiesList) return;
+		const itemElems = storiesList.querySelectorAll('.tui-item');
+		itemElems.forEach((elem, index) => {
+			if (index === selectedIndex) {
+				elem.classList.add('selected');
+				elem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+			} else {
+				elem.classList.remove('selected');
+			}
+		});
+		
+		// Refresh rendering to update metadata coloring on selection change
+		const items = stories[activeCategory];
+		const itemElemsMeta = storiesList.querySelectorAll('.tui-item-meta');
+		itemElemsMeta.forEach((metaElem, index) => {
+			const item = items[index];
+			if (item.read && index !== selectedIndex) {
+				metaElem.innerHTML = `<span class="meta-pts" style="color: var(--gray);">${item.pts} pts</span> · <span style="color: var(--gray);">by ${item.author}</span> · <span class="meta-time">${item.time}</span> · <span class="meta-comments" style="color: var(--gray);">${item.comments} comments</span>`;
+			} else {
+				metaElem.innerHTML = `<span class="meta-pts">${item.pts} pts</span> · by <span class="meta-author">${item.author}</span> · <span class="meta-time">${item.time}</span> · <span class="meta-comments">${item.comments} comments</span>`;
+			}
+		});
+	}
+
+	// Switch category tab
+	function switchTab(catName) {
+		if (inCommentsView) {
+			exitComments();
+		}
+		activeCategory = catName;
+		selectedIndex = 0;
+		tabs.forEach(t => {
+			if (t.getAttribute('data-cat') === catName) {
+				t.classList.add('active');
+			} else {
+				t.classList.remove('active');
+			}
+		});
+		renderCategory(catName);
+	}
+
+	// Show detailed comments view
+	function showComments(item) {
+		inCommentsView = true;
+		item.read = true; // Mark as read
+		
+		// Update footer bar keys
+		const footerBar = document.getElementById('tui-footer-bar');
+		if (footerBar) {
+			footerBar.innerHTML = `
+				<span class="footer-key">q/esc</span> <span class="footer-desc">back</span>  |  
+				<span class="footer-key">j/k</span> <span class="footer-desc">scroll comments</span>
+			`;
+		}
+
+		if (storiesList) {
+			storiesList.innerHTML = '';
+			
+			const container = document.createElement('div');
+			container.className = 'tui-comments-container';
+
+			const header = document.createElement('div');
+			header.className = 'tui-comments-header';
+			
+			const backBtn = document.createElement('div');
+			backBtn.className = 'tui-back-button';
+			backBtn.innerHTML = `❮ Back to list (esc)`;
+			backBtn.addEventListener('click', exitComments);
+			
+			const title = document.createElement('div');
+			title.className = 'tui-comment-story-title';
+			title.innerText = item.title;
+
+			header.appendChild(backBtn);
+			header.appendChild(title);
+			container.appendChild(header);
+
+			const commentsList = document.createElement('div');
+			commentsList.className = 'tui-comments-list';
+
+			if (item.commentsList && item.commentsList.length > 0) {
+				const indentColors = ['#ff6600', '#00f0ff', '#85a5ff', '#adff2f', '#ff00ff'];
+				item.commentsList.forEach(comment => {
+					const commentDiv = document.createElement('div');
+					commentDiv.className = 'tui-comment-item';
+					commentDiv.style.marginLeft = `${comment.depth * 16}px`;
+					if (comment.depth > 0) {
+						commentDiv.style.borderLeft = `1px solid ${indentColors[(comment.depth - 1) % indentColors.length]}`;
+						commentDiv.style.paddingLeft = '10px';
+					}
+
+					commentDiv.innerHTML = `
+						<div class="tui-comment-meta">
+							by <span class="meta-author">${comment.author}</span> · <span class="meta-time">${comment.time}</span>
+						</div>
+						<div class="tui-comment-body">${comment.text}</div>
+					`;
+					commentsList.appendChild(commentDiv);
+				});
+			} else {
+				const emptyDiv = document.createElement('div');
+				emptyDiv.style.color = 'var(--gray)';
+				emptyDiv.style.fontSize = '13px';
+				emptyDiv.style.padding = '20px 0';
+				emptyDiv.innerText = 'No comments yet.';
+				commentsList.appendChild(emptyDiv);
+			}
+
+			container.appendChild(commentsList);
+			storiesList.appendChild(container);
+		}
+	}
+
+	// Exit comments view and return to stories list
+	function exitComments() {
+		inCommentsView = false;
+		const footerBar = document.getElementById('tui-footer-bar');
+		if (footerBar) {
+			footerBar.innerHTML = `
+				<span class="footer-key">q</span> <span class="footer-desc">quit</span>  |  
+				<span class="footer-key">tab</span> <span class="footer-desc">category</span>  |  
+				<span class="footer-key">j/k</span> <span class="footer-desc">navigate</span>  |  
+				<span class="footer-key">enter</span> <span class="footer-desc">comments</span>  |  
+				<span class="footer-key">w</span> <span class="footer-desc">post</span>  |  
+				<span class="footer-key">/</span> <span class="footer-desc">search</span>
+			`;
+		}
+		renderCategory(activeCategory);
+	}
+
+	// Tab switching click event listeners
 	tabs.forEach(tab => {
 		tab.addEventListener('click', () => {
-			tabs.forEach(t => t.classList.remove('active'));
-			tab.classList.add('active');
 			const cat = tab.getAttribute('data-cat');
-			renderCategory(cat);
+			switchTab(cat);
 		});
 	});
 
+	// Keyboard TUI Controls
+	if (tuiWindow) {
+		// Keyboard focus indicators
+		tuiWindow.addEventListener('focus', () => {
+			if (tuiStatusText) {
+				tuiStatusText.innerText = 'KEYBOARD ACTIVE (Use vim keys)';
+				tuiStatusText.style.color = 'var(--green)';
+			}
+		});
+
+		tuiWindow.addEventListener('blur', () => {
+			if (tuiStatusText) {
+				tuiStatusText.innerText = 'Interactive TUI (Click to focus)';
+				tuiStatusText.style.color = '';
+			}
+		});
+
+		tuiWindow.addEventListener('keydown', (e) => {
+			const keysToIntercept = ['ArrowUp', 'ArrowDown', 'j', 'k', 'Enter', 'Escape', 'q', '1', '2', '3', '4', '5', 'Tab'];
+			if (keysToIntercept.includes(e.key)) {
+				e.preventDefault();
+				e.stopPropagation();
+			}
+
+			if (inCommentsView) {
+				if (e.key === 'Escape' || e.key === 'q') {
+					exitComments();
+				}
+				const commentsContainer = document.querySelector('.tui-comments-container');
+				if (commentsContainer) {
+					if (e.key === 'j' || e.key === 'ArrowDown') {
+						commentsContainer.scrollTop += 24;
+					} else if (e.key === 'k' || e.key === 'ArrowUp') {
+						commentsContainer.scrollTop -= 24;
+					}
+				}
+			} else {
+				const items = stories[activeCategory];
+				if (e.key === 'j' || e.key === 'ArrowDown') {
+					if (selectedIndex < items.length - 1) {
+						selectedIndex++;
+						updateSelection();
+					}
+				} else if (e.key === 'k' || e.key === 'ArrowUp') {
+					if (selectedIndex > 0) {
+						selectedIndex--;
+						updateSelection();
+					}
+				} else if (e.key === 'Enter') {
+					showComments(items[selectedIndex]);
+				} else if (e.key === '1') {
+					switchTab('top');
+				} else if (e.key === '2') {
+					switchTab('new');
+				} else if (e.key === '3') {
+					switchTab('best');
+				} else if (e.key === '4') {
+					switchTab('ask');
+				} else if (e.key === '5') {
+					switchTab('show');
+				} else if (e.key === 'Tab') {
+					const tabsList = ['top', 'new', 'best', 'ask', 'show'];
+					const nextIndex = (tabsList.indexOf(activeCategory) + 1) % tabsList.length;
+					switchTab(tabsList[nextIndex]);
+				}
+			}
+		});
+	}
+
 	// Initial render
 	renderCategory('top');
+
+	// System Boot Preloader Dismissal
+	window.addEventListener('DOMContentLoaded', () => {
+		const preloader = document.getElementById('system-preloader');
+		if (preloader) {
+			setTimeout(() => {
+				preloader.classList.add('fade-out');
+			}, 1300);
+		}
+	});
 
 	// Copy to clipboard function
 	const copyBtn = document.getElementById('copy-btn');
@@ -950,11 +1647,11 @@ go build -o hn-client main.go</code></pre>
 		copyBtn.addEventListener('click', () => {
 			const commandText = copyCommand.innerText;
 			navigator.clipboard.writeText(commandText).then(() => {
-				copyBtnText.innerText = 'Kopiert!';
+				copyBtnText.innerText = 'Copied!';
 				copyBtn.style.borderColor = 'var(--green)';
 				copyBtn.style.color = 'var(--green)';
 				setTimeout(() => {
-					copyBtnText.innerText = 'Kopieren';
+					copyBtnText.innerText = 'Copy';
 					copyBtn.style.borderColor = '';
 					copyBtn.style.color = '';
 				}, 2000);
@@ -963,4 +1660,38 @@ go build -o hn-client main.go</code></pre>
 			});
 		});
 	}
+
+	// Feature Cards mouse spotlight glow effect
+	const featureCards = document.querySelectorAll('.feature-card');
+	featureCards.forEach(card => {
+		card.addEventListener('mousemove', e => {
+			const rect = card.getBoundingClientRect();
+			const x = e.clientX - rect.left;
+			const y = e.clientY - rect.top;
+			(card as HTMLElement).style.setProperty('--mouse-x', `${x}px`);
+			(card as HTMLElement).style.setProperty('--mouse-y', `${y}px`);
+		});
+	});
+
+	// Scroll Reveal Animation implementation using IntersectionObserver
+	const revealElements = document.querySelectorAll('.reveal');
+	
+	const observerOptions = {
+		root: null,
+		rootMargin: '0px',
+		threshold: 0.15
+	};
+
+	const revealObserver = new IntersectionObserver((entries, observer) => {
+		entries.forEach(entry => {
+			if (entry.isIntersecting) {
+				entry.target.classList.add('visible');
+				observer.unobserve(entry.target);
+			}
+		});
+	}, observerOptions);
+
+	revealElements.forEach(element => {
+		revealObserver.observe(element);
+	});
 </script>
