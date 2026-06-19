@@ -527,7 +527,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m, nil
 				}
 				curr := displayStories[m.cursor]
-				return m, openURL(fmt.Sprintf("https://news.ycombinator.com/login?goto=reply%%3Fid%%3D%d", curr.ID))
+				return m, openURL(fmt.Sprintf("https://news.ycombinator.com/login?goto=item%%3Fid%%3D%d", curr.ID))
 			}
 		case "q", "ctrl+c":
 			if m.state == stateDetail {
