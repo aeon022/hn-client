@@ -79,8 +79,7 @@ var (
 
 	footerStyle = lipgloss.NewStyle().
 		Foreground(darkGray).
-		Border(lipgloss.NormalBorder(), true, false, false, false).
-		Padding(1, 0)
+		Border(lipgloss.NormalBorder(), true, false, false, false)
 )
 
 var categories = []string{"top", "new", "best", "ask", "show"}
@@ -133,7 +132,7 @@ type model struct {
 
 func initialModel() model {
 	ti := textinput.New()
-	ti.Placeholder = "Suche..."
+	ti.Placeholder = "Search..."
 	ti.CharLimit = 50
 	ti.Width = 20
 	ti.TextStyle = lipgloss.NewStyle().Foreground(white)
@@ -168,31 +167,31 @@ func cleanHTML(text string) string {
 	return t
 }
 
-// formatTime berechnet die relative Zeit (z.B. "vor 2 Stunden") aus einem Unix-Timestamp.
+// formatTime calculates relative time (e.g. "2 hours ago") from a Unix timestamp.
 func formatTime(unixTime int64) string {
 	t := time.Unix(unixTime, 0)
 	duration := time.Since(t)
 
 	if duration.Seconds() < 60 {
-		return "gerade eben"
+		return "just now"
 	} else if duration.Minutes() < 60 {
 		mins := int(duration.Minutes())
 		if mins == 1 {
-			return "vor 1 Minute"
+			return "1 minute ago"
 		}
-		return fmt.Sprintf("vor %d Minuten", mins)
+		return fmt.Sprintf("%d minutes ago", mins)
 	} else if duration.Hours() < 24 {
 		hours := int(duration.Hours())
 		if hours == 1 {
-			return "vor 1 Stunde"
+			return "1 hour ago"
 		}
-		return fmt.Sprintf("vor %d Stunden", hours)
+		return fmt.Sprintf("%d hours ago", hours)
 	} else {
 		days := int(duration.Hours() / 24)
 		if days == 1 {
-			return "vor 1 Tag"
+			return "1 day ago"
 		}
-		return fmt.Sprintf("vor %d Tagen", days)
+		return fmt.Sprintf("%d days ago", days)
 	}
 }
 
@@ -367,7 +366,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		headerHeight := 4
+		headerHeight := 2
 		footerHeight := 2
 		verticalMarginHeight := headerHeight + footerHeight
 
@@ -655,16 +654,16 @@ func (m *model) updateViewport() {
 			// Styled metadata items
 			var pts, author, commentsCount string
 			if hasBeenRead && m.cursor != i {
-				// Gelesene und nicht-ausgewählte Stories werden gedimmt dargestellt
+				// Dimmed for read, unselected
 				pts = lipgloss.NewStyle().Foreground(darkGray).Render(fmt.Sprintf("%d pts", item.Score))
 				author = lipgloss.NewStyle().Foreground(darkGray).Render(item.By)
-				commentsCount = lipgloss.NewStyle().Foreground(darkGray).Render(fmt.Sprintf("%d Kommentare", item.Descendants))
+				commentsCount = lipgloss.NewStyle().Foreground(darkGray).Render(fmt.Sprintf("%d comments", item.Descendants))
 			} else {
 				pts = lipgloss.NewStyle().Foreground(cyan).Render(fmt.Sprintf("%d pts", item.Score))
 				author = lipgloss.NewStyle().Foreground(orange).Render(item.By)
-				commentsCount = lipgloss.NewStyle().Foreground(blue).Render(fmt.Sprintf("%d Kommentare", item.Descendants))
+				commentsCount = lipgloss.NewStyle().Foreground(blue).Render(fmt.Sprintf("%d comments", item.Descendants))
 			}
-			metaText := fmt.Sprintf("%s · von %s · %s · %s", pts, author, timeStr, commentsCount)
+			metaText := fmt.Sprintf("%s · by %s · %s · %s", pts, author, timeStr, commentsCount)
 
 			var itemStr string
 			if m.cursor == i {
@@ -708,8 +707,8 @@ func (m *model) updateViewport() {
 		pts := lipgloss.NewStyle().Foreground(cyan).Render(fmt.Sprintf("%d pts", curr.Score))
 		author := lipgloss.NewStyle().Foreground(orange).Render(curr.By)
 		timeStr := formatTime(curr.Time)
-		commentsCount := lipgloss.NewStyle().Foreground(blue).Render(fmt.Sprintf("%d Kommentare", curr.Descendants))
-		meta := fmt.Sprintf("%s · von %s · %s · %s", pts, author, timeStr, commentsCount)
+		commentsCount := lipgloss.NewStyle().Foreground(blue).Render(fmt.Sprintf("%d comments", curr.Descendants))
+		meta := fmt.Sprintf("%s · by %s · %s · %s", pts, author, timeStr, commentsCount)
 		
 		s.WriteString(title + "\n")
 		s.WriteString(meta + "\n")
@@ -723,14 +722,14 @@ func (m *model) updateViewport() {
 			s.WriteString(detailStyle.Width(m.width - 8).Render(text) + "\n\n")
 		}
 
-		s.WriteString(headerStyle.Render("── Kommentare ──") + "\n\n")
+		s.WriteString(headerStyle.Render("── Comments ──") + "\n\n")
 
 		if m.loadingComments {
-			s.WriteString(lipgloss.NewStyle().Foreground(orange).Render("⌛ Lade Kommentare..."))
+			s.WriteString(lipgloss.NewStyle().Foreground(orange).Render("⌛ Loading comments..."))
 		} else {
 			comments := m.comments[curr.ID]
 			if len(comments) == 0 {
-				s.WriteString(lipgloss.NewStyle().Foreground(gray).Italic(true).Render("Keine Kommentare vorhanden."))
+				s.WriteString(lipgloss.NewStyle().Foreground(gray).Italic(true).Render("No comments available."))
 			} else {
 				s.WriteString(m.renderComments(comments))
 			}
@@ -784,7 +783,7 @@ func (m model) renderHelp() string {
 		Background(orange).
 		Bold(true).
 		Padding(0, 2).
-		Render("HILFE & TASTATURBELEGUNG")
+		Render("HELP & KEYBINDINGS")
 
 	var table strings.Builder
 
@@ -806,25 +805,25 @@ func (m model) renderHelp() string {
 		return "  " + k + "  " + d
 	}
 
-	table.WriteString(section("Navigation & Story-Liste") + "\n")
-	table.WriteString(shortcut("j / k / ↓ / ↑", "Navigieren") + "\n")
-	table.WriteString(shortcut("Mausrad", "Scrollen / Cursor bewegen") + "\n")
-	table.WriteString(shortcut("Tab / Shift+Tab", "Kategorie wechseln") + "\n")
-	table.WriteString(shortcut("1 - 5", "Direktwahl (Top, New, Best, Ask, Show)") + "\n")
-	table.WriteString(shortcut("Enter", "Details & Kommentare öffnen") + "\n")
-	table.WriteString(shortcut("o", "Original-Link im Browser öffnen") + "\n")
-	table.WriteString(shortcut("w", "Neuen Beitrag verfassen (Browser)") + "\n")
+	table.WriteString(section("Navigation & Story List") + "\n")
+	table.WriteString(shortcut("j / k / ↓ / ↑", "Navigate") + "\n")
+	table.WriteString(shortcut("Mouse Wheel", "Scroll / Move Cursor") + "\n")
+	table.WriteString(shortcut("Tab / Shift+Tab", "Switch Category") + "\n")
+	table.WriteString(shortcut("1 - 5", "Direct Feed Selection") + "\n")
+	table.WriteString(shortcut("Enter", "Open Details & Comments") + "\n")
+	table.WriteString(shortcut("o", "Open Original Link") + "\n")
+	table.WriteString(shortcut("w", "Write Submission (Browser)") + "\n")
 
-	table.WriteString(section("Kommentaransicht") + "\n")
-	table.WriteString(shortcut("j / k / ↓ / ↑", "Scrollen") + "\n")
-	table.WriteString(shortcut("Mausrad", "Scrollen") + "\n")
-	table.WriteString(shortcut("Esc / q", "Zurück zur Story-Liste") + "\n")
-	table.WriteString(shortcut("o", "Original-Link im Browser öffnen") + "\n")
-	table.WriteString(shortcut("r", "Auf Beitrag antworten (Browser)") + "\n")
+	table.WriteString(section("Comments View") + "\n")
+	table.WriteString(shortcut("j / k / ↓ / ↑", "Scroll") + "\n")
+	table.WriteString(shortcut("Mouse Wheel", "Scroll") + "\n")
+	table.WriteString(shortcut("Esc / q", "Back to Story List") + "\n")
+	table.WriteString(shortcut("o", "Open Original Link") + "\n")
+	table.WriteString(shortcut("r", "Reply to Thread (Browser)") + "\n")
 
-	table.WriteString(section("Allgemein") + "\n")
-	table.WriteString(shortcut("?", "Dieses Hilfemenü schließen") + "\n")
-	table.WriteString(shortcut("ctrl+c", "Anwendung beenden") + "\n")
+	table.WriteString(section("General") + "\n")
+	table.WriteString(shortcut("?", "Close Help Menu") + "\n")
+	table.WriteString(shortcut("ctrl+c", "Quit Application") + "\n")
 
 	modalContent := lipgloss.JoinVertical(lipgloss.Left,
 		title,
@@ -837,7 +836,7 @@ func (m model) renderHelp() string {
 		Padding(1, 2).
 		Render(modalContent)
 
-	height := m.height - 6
+	height := m.height - 4
 	if height < 1 {
 		height = 1
 	}
@@ -854,12 +853,12 @@ func formatShortcut(key, desc string) string {
 
 func (m model) View() string {
 	if !m.ready {
-		return "\n  Initialisiere..."
+		return "  Initializing..."
 	}
 
 	if m.err != nil {
-		return fmt.Sprintf("\n  %s\n\n  %s", 
-			titleStyle.Render(" FEHLER "),
+		return fmt.Sprintf("  %s\n\n  %s", 
+			titleStyle.Render(" ERROR "),
 			lipgloss.NewStyle().Foreground(lipgloss.Color("#FF0000")).Render(m.err.Error()))
 	}
 
@@ -884,21 +883,21 @@ func (m model) View() string {
 		tabsRow := strings.Join(tabs, " ")
 		headerText = titleStyle.Render(" HACKER NEWS ") + "  " + tabsRow
 		
-		// Falls ein Filter aktiv ist, hängen wir ihn an den Header an
+		// If a filter is active, append it to the header
 		if m.searchInput.Value() != "" {
 			headerText += lipgloss.NewStyle().Foreground(gray).Italic(true).Render(fmt.Sprintf("  (Filter: %q)", m.searchInput.Value()))
 		}
 	} else {
-		// Header im Reader (LESEMODUS)
-		headerText = titleStyle.Render(" HACKER NEWS ") + "  │  " + lipgloss.NewStyle().Foreground(orange).Bold(true).Render("LESEMODUS (Kommentare)")
+		// Header in reader mode
+		headerText = titleStyle.Render(" HACKER NEWS ") + "  │  " + lipgloss.NewStyle().Foreground(orange).Bold(true).Render("READER MODE (Comments)")
 	}
 
-	// Trennlinie über die gesamte Terminalbreite
+	// Divider across the entire terminal width
 	divider := lipgloss.NewStyle().Foreground(darkGray).Render(strings.Repeat("─", m.width))
-	header := fmt.Sprintf("\n%s\n%s\n", headerText, divider)
+	header := fmt.Sprintf("%s\n%s\n", headerText, divider)
 
 	if m.loading {
-		return "\n" + headerText + "\n" + divider + "\n\n  " + lipgloss.NewStyle().Foreground(orange).Render("⌛ Lade...")
+		return headerText + "\n" + divider + "\n\n  " + lipgloss.NewStyle().Foreground(orange).Render("⌛ Loading...")
 	}
 
 	var content string
@@ -910,32 +909,31 @@ func (m model) View() string {
 
 	var footer string
 	if m.searchActive {
-		searchLabel := lipgloss.NewStyle().Foreground(white).Bold(true).Render(" 🔍 Suche: ")
+		searchLabel := lipgloss.NewStyle().Foreground(white).Bold(true).Render(" 🔍 Search: ")
 		footer = footerStyle.Width(m.width).Render(
-			searchLabel + m.searchInput.View() + lipgloss.NewStyle().Foreground(lightGray).Render("  (Esc: Abbrechen / Enter: Übernehmen)"),
+			searchLabel + m.searchInput.View() + lipgloss.NewStyle().Foreground(lightGray).Render("  (Esc: Cancel / Enter: Apply)"),
 		)
 	} else if m.state == stateList {
 		shortcuts := []string{
-			formatShortcut("q", "beenden"),
-			formatShortcut("tab/shift+tab", "kategorie"),
-			formatShortcut("1-5", "direktwahl"),
-			formatShortcut("j/k", "navigieren"),
-			formatShortcut("enter", "kommentare"),
-			formatShortcut("o", "link öffnen"),
-			formatShortcut("w", "posten"),
+			formatShortcut("q", "quit"),
+			formatShortcut("tab", "feed"),
+			formatShortcut("j/k", "nav"),
+			formatShortcut("enter", "view"),
+			formatShortcut("o", "link"),
+			formatShortcut("/", "search"),
+			formatShortcut("?", "help"),
 		}
 		if m.searchInput.Value() != "" {
-			shortcuts = append(shortcuts, formatShortcut("x", "filter löschen"))
+			shortcuts = append(shortcuts, formatShortcut("x", "clear filter"))
 		}
-		shortcuts = append(shortcuts, formatShortcut("/", "suchen"), formatShortcut("?", "hilfe"))
 		footer = footerStyle.Width(m.width).Render(strings.Join(shortcuts, "  |  "))
 	} else {
 		shortcuts := []string{
-			formatShortcut("esc/q", "zurück"),
-			formatShortcut("j/k", "scrollen"),
-			formatShortcut("o", "link öffnen"),
-			formatShortcut("r", "antworten"),
-			formatShortcut("?", "hilfe"),
+			formatShortcut("esc/q", "back"),
+			formatShortcut("j/k", "scroll"),
+			formatShortcut("o", "link"),
+			formatShortcut("r", "reply"),
+			formatShortcut("?", "help"),
 		}
 		footer = footerStyle.Width(m.width).Render(strings.Join(shortcuts, "  |  "))
 	}
