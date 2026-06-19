@@ -133,12 +133,14 @@ import FooterSignature from '../components/FooterSignature.astro';
 
 					<!-- TUI Footer -->
 					<div class="tui-footer" id="tui-footer-bar">
-						<span class="footer-key">q</span> <span class="footer-desc">quit</span>  |  
-						<span class="footer-key">tab</span> <span class="footer-desc">category</span>  |  
-						<span class="footer-key">j/k</span> <span class="footer-desc">navigate</span>  |  
-						<span class="footer-key">enter</span> <span class="footer-desc">comments</span>  |  
-						<span class="footer-key">w</span> <span class="footer-desc">post</span>  |  
-						<span class="footer-key">/</span> <span class="footer-desc">search</span>
+						<span class="footer-key">q</span> <span class="footer-desc">quit</span> | 
+						<span class="footer-key">tab</span> <span class="footer-desc">feed</span> | 
+						<span class="footer-key">j/k</span> <span class="footer-desc">nav</span> | 
+						<span class="footer-key">enter</span> <span class="footer-desc">view</span> | 
+						<span class="footer-key">o</span> <span class="footer-desc">link</span> | 
+						<span class="footer-key">w</span> <span class="footer-desc">post</span> | 
+						<span class="footer-key">/</span> <span class="footer-desc">search</span> | 
+						<span class="footer-key">?</span> <span class="footer-desc">help</span>
 					</div>
 				</div>
 			</div>
@@ -2230,8 +2232,11 @@ go build -o hn-client main.go</code></pre>
 		const footerBar = document.getElementById('tui-footer-bar');
 		if (footerBar) {
 			footerBar.innerHTML = `
-				<span class="footer-key">q/esc</span> <span class="footer-desc">back</span>  |  
-				<span class="footer-key">j/k</span> <span class="footer-desc">scroll comments</span>
+				<span class="footer-key">esc/q</span> <span class="footer-desc">back</span> | 
+				<span class="footer-key">j/k</span> <span class="footer-desc">scroll</span> | 
+				<span class="footer-key">o</span> <span class="footer-desc">link</span> | 
+				<span class="footer-key">r</span> <span class="footer-desc">reply</span> | 
+				<span class="footer-key">?</span> <span class="footer-desc">help</span>
 			`;
 		}
 
@@ -2299,12 +2304,14 @@ go build -o hn-client main.go</code></pre>
 		const footerBar = document.getElementById('tui-footer-bar');
 		if (footerBar) {
 			footerBar.innerHTML = `
-				<span class="footer-key">q</span> <span class="footer-desc">quit</span>  |  
-				<span class="footer-key">tab</span> <span class="footer-desc">category</span>  |  
-				<span class="footer-key">j/k</span> <span class="footer-desc">navigate</span>  |  
-				<span class="footer-key">enter</span> <span class="footer-desc">comments</span>  |  
-				<span class="footer-key">w</span> <span class="footer-desc">post</span>  |  
-				<span class="footer-key">/</span> <span class="footer-desc">search</span>
+				<span class="footer-key">q</span> <span class="footer-desc">quit</span> | 
+				<span class="footer-key">tab</span> <span class="footer-desc">feed</span> | 
+				<span class="footer-key">j/k</span> <span class="footer-desc">nav</span> | 
+				<span class="footer-key">enter</span> <span class="footer-desc">view</span> | 
+				<span class="footer-key">o</span> <span class="footer-desc">link</span> | 
+				<span class="footer-key">w</span> <span class="footer-desc">post</span> | 
+				<span class="footer-key">/</span> <span class="footer-desc">search</span> | 
+				<span class="footer-key">?</span> <span class="footer-desc">help</span>
 			`;
 		}
 		renderCategory(activeCategory);
@@ -2336,7 +2343,7 @@ go build -o hn-client main.go</code></pre>
 		});
 
 		tuiWindow.addEventListener('keydown', (e) => {
-			const keysToIntercept = ['ArrowUp', 'ArrowDown', 'j', 'k', 'Enter', 'Escape', 'q', '1', '2', '3', '4', '5', 'Tab'];
+			const keysToIntercept = ['ArrowUp', 'ArrowDown', 'j', 'k', 'Enter', 'Escape', 'q', '1', '2', '3', '4', '5', 'Tab', 'o', 'w', 'r', '?'];
 			if (keysToIntercept.includes(e.key)) {
 				e.preventDefault();
 				e.stopPropagation();
@@ -2345,6 +2352,16 @@ go build -o hn-client main.go</code></pre>
 			if (inCommentsView) {
 				if (e.key === 'Escape' || e.key === 'q') {
 					exitComments();
+				} else if (e.key === 'o') {
+					const items = stories[activeCategory];
+					const curr = items[selectedIndex];
+					if (curr) {
+						window.open('https://hn.algolia.com/?q=' + encodeURIComponent(curr.title), '_blank');
+					}
+				} else if (e.key === 'r') {
+					window.open('https://news.ycombinator.com/login?goto=submit', '_blank');
+				} else if (e.key === '?') {
+					alert("hn-client simulator (Comments View):\n\n• esc / q - Back to story list\n• j / k - Scroll comments\n• o - Open original link\n• r - Reply to thread");
 				}
 				const commentsContainer = document.querySelector('.tui-comments-container');
 				if (commentsContainer) {
@@ -2368,6 +2385,13 @@ go build -o hn-client main.go</code></pre>
 					}
 				} else if (e.key === 'Enter') {
 					showComments(items[selectedIndex]);
+				} else if (e.key === 'o') {
+					const curr = items[selectedIndex];
+					if (curr) {
+						window.open('https://hn.algolia.com/?q=' + encodeURIComponent(curr.title), '_blank');
+					}
+				} else if (e.key === 'w') {
+					window.open('https://news.ycombinator.com/login?goto=submit', '_blank');
 				} else if (e.key === '1') {
 					switchTab('top');
 				} else if (e.key === '2') {
@@ -2382,6 +2406,8 @@ go build -o hn-client main.go</code></pre>
 					const tabsList = ['top', 'new', 'best', 'ask', 'show'];
 					const nextIndex = (tabsList.indexOf(activeCategory) + 1) % tabsList.length;
 					switchTab(tabsList[nextIndex]);
+				} else if (e.key === '?') {
+					alert("hn-client simulator (Stories View):\n\n• q - Quit (simulator focus loss)\n• tab - Cycle feed categories\n• 1..5 - Switch feeds directly\n• j / k - Navigate items\n• enter - View comments\n• o - Open link\n• w - Submit post\n• / - Filter active list");
 				}
 			}
 		});
