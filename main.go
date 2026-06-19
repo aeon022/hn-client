@@ -373,6 +373,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if !m.ready {
 			m.viewport = viewport.New(msg.Width, msg.Height-verticalMarginHeight)
 			m.viewport.YPosition = headerHeight
+			m.viewport.MouseWheelEnabled = true
 			m.ready = true
 		} else {
 			m.viewport.Width = msg.Width
@@ -420,6 +421,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.updateViewport()
 				}
 			}
+			return m, nil
 		}
 
 	case tea.KeyMsg:
