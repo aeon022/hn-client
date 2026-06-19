@@ -19,8 +19,9 @@ import FooterSignature from '../components/FooterSignature.astro';
 		</div>
 	</div>
 
-	<!-- Hero Background Glows -->
-	<div class="hero-glow"></div>
+	<div id="app-container">
+		<!-- Hero Background Glows -->
+		<div class="hero-glow"></div>
 	<div class="hero-glow-secondary"></div>
 
 	<!-- Header -->
@@ -506,6 +507,13 @@ go build -o hn-client main.go</code></pre>
 			</div>
 		</div>
 	</footer>
+	</div>
+
+	<!-- Reboot Back to Top Button -->
+	<button id="reboot-btn" class="reboot-btn" title="Reboot System (Back to Top)">
+		<span class="reboot-btn-icon">❯</span>
+		<span class="reboot-btn-text">REBOOT</span>
+	</button>
 
 	<!-- Abteilung 83 Signature -->
 	<FooterSignature />
@@ -1751,6 +1759,64 @@ go build -o hn-client main.go</code></pre>
 		font-size: 14px;
 		line-height: 1.6;
 	}
+
+	/* Reboot Floating Button */
+	.reboot-btn {
+		position: fixed;
+		bottom: 30px;
+		right: 30px;
+		background: #020204;
+		border: 1px solid var(--border-color);
+		color: var(--hn-orange);
+		padding: 10px 16px;
+		border-radius: 6px;
+		cursor: pointer;
+		font-family: 'Fira Code', monospace;
+		font-size: 11px;
+		font-weight: bold;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		z-index: 990;
+		opacity: 0;
+		visibility: hidden;
+		transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 10px rgba(255, 102, 0, 0.02);
+		letter-spacing: 0.1em;
+	}
+
+	.reboot-btn:hover {
+		border-color: var(--hn-orange);
+		color: #ffffff;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(255, 102, 0, 0.15);
+		transform: translateY(-2px);
+	}
+
+	.reboot-btn.visible {
+		opacity: 1;
+		visibility: visible;
+	}
+
+	.reboot-btn-icon {
+		animation: arrowPulse 1.5s infinite;
+	}
+
+	@keyframes arrowPulse {
+		0%, 100% { opacity: 0.5; transform: translateX(0); }
+		50% { opacity: 1; transform: translateX(2px); }
+	}
+
+	/* Deconstruct Dissolve Animation */
+	#app-container {
+		transition: filter 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
+	#app-container.deconstruct {
+		opacity: 0;
+		filter: blur(30px) brightness(1.8) contrast(1.5) hue-rotate(90deg);
+		transform: translateY(-80px) scale(0.96) skewX(10deg);
+		pointer-events: none;
+	}
 </style>
 
 <script>
@@ -2317,5 +2383,70 @@ go build -o hn-client main.go</code></pre>
 				content.style.maxHeight = content.scrollHeight + 'px';
 			}
 		});
+	});
+
+	// Reboot / Back to Top Button
+	const rebootBtn = document.getElementById('reboot-btn');
+	const appContainer = document.getElementById('app-container');
+	const preloader = document.getElementById('system-preloader');
+	const preloaderLines = document.querySelector('.preloader-lines');
+	const preloaderProgress = document.querySelector('.preloader-progress-fill');
+
+	// Show/hide reboot button on scroll
+	window.addEventListener('scroll', () => {
+		if (window.scrollY > 400) {
+			rebootBtn?.classList.add('visible');
+		} else {
+			rebootBtn?.classList.remove('visible');
+		}
+	});
+
+	rebootBtn?.addEventListener('click', () => {
+		if (!appContainer || !preloader) return;
+
+		// 1. Trigger deconstruct (dissolve) transition
+		appContainer.classList.add('deconstruct');
+
+		// 2. Prepare preloader lines for reboot text
+		if (preloaderLines) {
+			preloaderLines.innerHTML = `
+				<div class="preloader-line line-1">❯ reboot sequence triggered...</div>
+				<div class="preloader-line line-2">❯ flushing virtual memory cache...</div>
+				<div class="preloader-line line-3">❯ compiling DOM layout trees...</div>
+				<div class="preloader-line line-4">❯ system online (rebuilt)</div>
+			`;
+		}
+
+		// Reset progress bar animation
+		if (preloaderProgress) {
+			const el = preloaderProgress as HTMLElement;
+			el.style.animation = 'none';
+			el.offsetHeight; /* trigger reflow */
+			el.style.animation = '';
+		}
+
+		// 3. Show preloader (undim)
+		preloader.classList.remove('fade-out');
+
+		// 4. Scroll to top and restore app state
+		setTimeout(() => {
+			window.scrollTo({ top: 0 });
+			appContainer.classList.remove('deconstruct');
+			
+			// Re-trigger scroll reveals
+			document.querySelectorAll('.reveal').forEach(el => {
+				el.classList.remove('visible');
+			});
+			// Re-initialize reveals since they should stagger back in
+			const revealElements = document.querySelectorAll('.reveal');
+			revealElements.forEach(element => {
+				revealObserver.observe(element);
+			});
+		}, 600); // Trigger mid-way during dissolve transition
+
+		// 5. Fade preloader back out
+		setTimeout(() => {
+			preloader.classList.add('fade-out');
+		}, 1800);
 	});
 </script>
