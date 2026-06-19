@@ -382,7 +382,10 @@ import FooterSignature from '../components/FooterSignature.astro';
 				<div class="level-dashboard">
 					<div class="level-info">
 						<h3 id="level-title" class="level-title-text">Level 1: Booting the TUI Kernel</h3>
-						<p id="level-desc" class="level-desc-text">In Go, executable programs start inside package main with a main() function. We import Charm's Bubble Tea framework, initialize our model state, and run the program in alt screen mode.</p>
+						<div id="level-desc" class="level-desc-text">
+							<p>In Go, executable programs are compiled from a source entry point located inside <strong><code>package main</code></strong>. The execution runtime automatically invokes the <strong><code>func main()</code></strong> function when the binary starts.</p>
+							<p>To build our terminal UI, we import Charm's <strong>Bubble Tea</strong> library. We initialize our application instance using <code>tea.NewProgram()</code>. By passing the <strong><code>tea.WithAltScreen()</code></strong> option, Go instructs the terminal emulator to open a separate screen buffer. This suspends your shell session, hides previous commands, and gives the TUI control over the entire window dimensions. Upon quitting, it cleanly restores the shell state.</p>
+						</div>
 						
 						<div class="level-meta-box">
 							<h4>Mission Checklist</h4>
@@ -1795,6 +1798,14 @@ go build -o hn-client main.go</code></pre>
 		line-height: 1.6;
 	}
 
+	.level-desc-text p {
+		margin-bottom: 12px;
+	}
+
+	.level-desc-text p:last-child {
+		margin-bottom: 0;
+	}
+
 	.level-meta-box {
 		background: rgba(255, 255, 255, 0.02);
 		border: 1px solid var(--border-color);
@@ -2976,7 +2987,8 @@ go build -o hn-client main.go</code></pre>
 	const tutorialLevels = {
 		1: {
 			title: "Level 1: Booting the TUI Kernel",
-			desc: "In Go, executable programs start inside package main with a main() function. We import Charm's Bubble Tea framework, initialize our model state, and run the program in alt screen mode.",
+			desc: `<p>In Go, executable programs are compiled from a source entry point located inside <strong><code>package main</code></strong>. The execution runtime automatically invokes the <strong><code>func main()</code></strong> function when the binary starts.</p>
+<p>To build our terminal UI, we import Charm's <strong>Bubble Tea</strong> library. We initialize our application instance using <code>tea.NewProgram()</code>. By passing the <strong><code>tea.WithAltScreen()</code></strong> option, Go instructs the terminal emulator to open a separate screen buffer. This suspends your shell session, hides previous commands, and gives the TUI control over the entire window dimensions. Upon quitting, it cleanly restores the shell state.</p>`,
 			checklist: [
 				"Declare package main",
 				"Import github.com/charmbracelet/bubbletea",
@@ -3001,7 +3013,8 @@ func main() {
 		},
 		2: {
 			title: "Level 2: The UI Blueprint (State)",
-			desc: "Go is statically typed. Instead of object-oriented classes, we use struct to define our state shape. The initialModel() function acts as our constructor, allocating memory for maps and setting defaults.",
+			desc: `<p>Go is a <strong>statically typed</strong> language with strict compile-time checks. Unlike object-oriented languages, Go has no classes or classical inheritance. Instead, we use <strong><code>struct</code></strong> composition to define the shape and properties of our data.</p>
+<p>Our program's state is encapsulated within the <strong><code>type model struct</code></strong>. We define slices (resizable arrays) to store stories, and maps (key-value hash tables) to cache comments. In Go, maps must be allocated in memory using the built-in <strong><code>make()</code></strong> function before write operations; writing to an unallocated map results in a runtime panic. The constructor function <code>initialModel()</code> returns our initialized state model.</p>`,
 			checklist: [
 				"Declare type model struct",
 				"Define fields for list cursor, category, loading states",
@@ -3025,7 +3038,8 @@ func initialModel() model {
 		},
 		3: {
 			title: "Level 3: Intercepting Key Inputs",
-			desc: "The Update function receives keyboard, mouse, and other events. We use a type switch (msg := msg.(type)) to match key messages and map j/k Vim keys to moving the list cursor, or q to quit.",
+			desc: `<p>Events (keyboard inputs, mouse clicks, resize events) are processed by the <strong><code>Update()</code></strong> receiver method. In Go, methods are attached to structs using a receiver parameter: <code>func (m model) Update(msg tea.Msg)</code>.</p>
+<p>The message \`msg\` is passed as a <code>tea.Msg</code>, which is an empty interface (\`interface{}\` or \`any\`), meaning it can contain any value. We use a <strong>type switch</strong> (<code>switch msg := msg.(type)</code>) to inspect the concrete type of the message. If it is a <strong><code>tea.KeyMsg</code></strong>, we match on keys (like Vim <code>j</code>/<code>k</code> keys to scroll or <code>q</code> to exit), modify our cursor index, and return the updated model state.</p>`,
 			checklist: [
 				"Implement Update(msg tea.Msg) method",
 				"Check if message is tea.KeyMsg type",
@@ -3049,7 +3063,8 @@ func initialModel() model {
 		},
 		4: {
 			title: "Level 4: Rendering Graphics to Screen",
-			desc: "The View method takes the current model state and renders it as a printable string. Lip Gloss is used to style text with colors, borders, and margins directly in your shell buffer.",
+			desc: `<p>The <strong><code>View()</code></strong> receiver method is called automatically after every state update. It takes a copy of our model and returns a single formatted string that represents the entire terminal display.</p>
+<p>We build our layout programmatically. For complex layouts, we use <strong><code>strings.Builder</code></strong> for memory-efficient string concatenation (preventing unnecessary garbage collection allocations). We style text with colors, padding, and alignments using <strong>Lip Gloss</strong>, which compiles CSS-like declarations into standard ANSI terminal escape sequences that shell buffers render natively.</p>`,
 			checklist: [
 				"Implement View() string receiver method",
 				"Verify model.loading state before drawing list",
@@ -3075,7 +3090,8 @@ func initialModel() model {
 		},
 		5: {
 			title: "Level 5: Going Async & Launching w3m",
-			desc: "Go handles async routines concurrently. Bubble Tea commands (tea.Cmd) execute in a background goroutine and send success or error messages back to the main UI thread once completed.",
+			desc: `<p>Go handles asynchronous operations concurrently via <strong>Goroutines</strong>. In Bubble Tea, background jobs are encapsulated as commands: <strong><code>tea.Cmd</code></strong> (a function returning a message). We run our Hacker News API HTTP calls in a command, which runs concurrently without blocking the main UI thread.</p>
+<p>When the background task completes, its return value is safely dispatched back into the main \`Update()\` loop. To launch terminal web browsers like <code>w3m</code> for posting replies, we instantiate an OS process command via Go's <strong><code>os/exec</code></strong> package and pass it to <strong><code>tea.ExecProcess</code></strong>, which pauses our AltScreen loop, hands full terminal control to \`w3m\`, and restores the TUI when \`w3m\` terminates.</p>`,
 			checklist: [
 				"Create asynchronous fetchStories() command",
 				"Process statusMsg payload in Update loop",
@@ -3128,7 +3144,7 @@ func openURL(url string) tea.Cmd {
 
 		// Update texts
 		if (levelTitle) levelTitle.innerText = data.title;
-		if (levelDesc) levelDesc.innerText = data.desc;
+		if (levelDesc) levelDesc.innerHTML = data.desc;
 		if (levelCodeBlock) levelCodeBlock.innerText = data.code;
 
 		// Update checklist
