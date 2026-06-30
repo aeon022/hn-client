@@ -24,12 +24,15 @@ Ein moderner, schneller und minimalistischer Hacker News Client direkt für dein
 
 ### Voraussetzungen
 Stelle sicher, dass **Go (Version 1.21 oder höher)** installiert ist.
-Unter macOS kannst du Go via Homebrew installieren:
+
+### Schnelle Installation (Empfohlen)
+Wir bieten ein einfaches Installationsskript an, das alle Abhängigkeiten auflöst, das Tool kompiliert und auf Wunsch global in `/usr/local/bin` installiert:
 ```bash
-brew install go
+chmod +x setup.sh
+./setup.sh
 ```
 
-### Setup & Ausführen
+### Manueller Start & Ausführen
 
 1. **Abhängigkeiten herunterladen**:
    ```bash
@@ -41,7 +44,7 @@ brew install go
    go run main.go
    ```
 
-3. **App kompilieren (optional)**:
+3. **App manuell kompilieren**:
    ```bash
    go build -o hn-client
    ./hn-client
@@ -86,4 +89,16 @@ brew install go
 
 - **[main.go](file:///Users/gweiher/Developing/Projects/hn-client/main.go)**: Der Einstiegspunkt der Anwendung. Enthält die komplette TUI-Zustandsverwaltung, Eingabebehandlung und das UI-Rendering.
 - **[internal/hnapi/api.go](file:///Users/gweiher/Developing/Projects/hn-client/internal/hnapi/api.go)**: Die API-Integration. Holt Daten von der offiziellen Hacker News Firebase API im JSON-Format ab.
+- **[setup.sh](file:///Users/gweiher/Developing/Projects/hn-client/setup.sh)**: Automatisches Build- und Installationsskript für macOS und Linux.
 - **[docs/](file:///Users/gweiher/Developing/Projects/hn-client/docs)**: Weitere Konzeptentwürfe, Entwicklungsanleitungen und die Roadmap.
+
+---
+
+## 🤖 Verwendung mit KI-Assistenten (AI-ready)
+
+Dieses Repository ist optimiert für die Arbeit mit KI-Coding-Assistenten (wie Google Antigravity, Claude, ChatGPT, etc.):
+
+1. **Verständlicher Code für KI-Kopiloten**: Die Dateistruktur ist hochgradig modularisiert. `internal/hnapi/` kapselt die Netzwerkzugriffe ab, während `main.go` die TUI-Zustände verwaltet. Dies macht es KI-Agenten sehr einfach, Code-Fragmente zu analysieren, Fehler zu beheben oder neue Features ohne Seiteneffekte hinzuzufügen.
+2. **Lern-Sandbox (`TUTORIAL.md`)**: Das Projekt enthält ein detailliertes [Go-Tutorial](file:///Users/gweiher/Developing/Projects/hn-client/TUTORIAL.md). Du kannst deine KI bitten, dir Aufgaben aus diesem Tutorial zu stellen, deinen Code zu korrigieren oder dir Konzepte wie Goroutines und Channels anhand dieser Codebasis zu erklären.
+3. **Verarbeitung der Lesegeschichte (`~/.hn-history.json`)**: Da alle besuchten Stories mit Unix-Zeitstempeln in einer einfachen JSON-Struktur gespeichert werden, kann eine KI (oder ein externes Python-Script) deine Lesegewohnheiten analysieren, personalisierte Themen-Zusammenfassungen erstellen oder Lesestatistiken generieren.
+4. **Sichere Layout-Constraints**: Durch die integrierten Mindestbreiten und dynamischen String-Kürzungen können KI-Modelle Layout-Vorschläge einbringen, ohne das Risiko einzugehen, TUI-Panics bei Breitenänderungen zu erzeugen.
