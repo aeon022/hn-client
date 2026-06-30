@@ -1,3 +1,6 @@
 .hn-session
 .hn-history.json
 hn-client
+node_modules/
+.astro/
+dist/
