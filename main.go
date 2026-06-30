@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"regexp"
 	"runtime"
 	"strings"
 	"sync"
@@ -153,6 +154,8 @@ func initialModel() model {
 	}
 }
 
+var linkRegex = regexp.MustCompile(`<a\s+href="([^"]+)"[^>]*>(.*?)</a>`)
+
 // cleanHTML ist eine einfache Hilfe zum Säubern von HN Texten.
 func cleanHTML(text string) string {
 	t := text
@@ -164,7 +167,43 @@ func cleanHTML(text string) string {
 	t = strings.ReplaceAll(t, "&amp;", "&")
 	t = strings.ReplaceAll(t, "<i>", "")
 	t = strings.ReplaceAll(t, "</i>", "")
+	t = strings.ReplaceAll(t, "<code>", "`")
+	t = strings.ReplaceAll(t, "</code>", "`")
+	t = strings.ReplaceAll(t, "<pre>", "\n")
+	t = strings.ReplaceAll(t, "</pre>", "\n")
+
+	// HTML-Links säubern und lesbarer formatieren
+	t = linkRegex.ReplaceAllStringFunc(t, func(m string) string {
+		match := linkRegex.FindStringSubmatch(m)
+		if len(match) < 3 {
+			return m
+		}
+		url := match[1]
+		linkText := match[2]
+
+		// Eventuell verschachtelte Tags im Link-Text entfernen
+		linkText = regexp.MustCompile("<[^>]*>").ReplaceAllString(linkText, "")
+
+		// Wenn der Text identisch zur URL ist, nur die URL anzeigen
+		if url == linkText || strings.TrimSuffix(url, "/") == strings.TrimSuffix(linkText, "/") {
+			return url
+		}
+		return fmt.Sprintf("%s (%s)", linkText, url)
+	})
+
 	return t
+}
+
+// truncateString kürzt einen String auf eine maximale Länge und fügt "..." an.
+func truncateString(s string, maxLen int) string {
+	runes := []rune(s)
+	if len(runes) <= maxLen {
+		return s
+	}
+	if maxLen < 3 {
+		return string(runes[:maxLen])
+	}
+	return string(runes[:maxLen-3]) + "..."
 }
 
 // formatTime calculates relative time (e.g. "2 hours ago") from a Unix timestamp.
@@ -331,17 +370,35 @@ func fetchComments(storyID int, kids []int, indent int) []comment {
 	return res
 }
 
+func getHistoryPath() string {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return ".hn-history.json"
+	}
+	return home + "/.hn-history.json"
+}
+
 func saveHistory(history map[int]int64) error {
 	data, err := json.Marshal(history)
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(".hn-history.json", data, 0600)
+	return os.WriteFile(getHistoryPath(), data, 0600)
 }
 
 func loadHistory() (map[int]int64, error) {
-	data, err := os.ReadFile(".hn-history.json")
+	path := getHistoryPath()
+	data, err := os.ReadFile(path)
 	if err != nil {
+		// Migration: Prüfen, ob lokales History-File existiert
+		if localData, localErr := os.ReadFile(".hn-history.json"); localErr == nil {
+			var history map[int]int64
+			if err := json.Unmarshal(localData, &history); err == nil {
+				_ = os.WriteFile(path, localData, 0600)
+				_ = os.Remove(".hn-history.json") // Lokales File aufräumen
+				return history, nil
+			}
+		}
 		if os.IsNotExist(err) {
 			return make(map[int]int64), nil
 		}
@@ -530,6 +587,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 				curr := displayStories[m.cursor]
 				return m, openURL(fmt.Sprintf("https://news.ycombinator.com/login?goto=item%%3Fid%%3D%d", curr.ID))
+			} else {
+				m.loading = true
+				m.cursor = 0
+				m.viewport.YOffset = 0
+				return m, fetchStories(m.category)
 			}
 		case "q", "ctrl+c":
 			if m.state == stateDetail {
@@ -653,6 +715,15 @@ func (m *model) updateViewport() {
 				titlePrefix = "✓ "
 			}
 
+			// Kürzen des Titels, um Zeilenumbruch und Scroll-Drift zu verhindern
+			maxTitleLen := m.width - 6
+			if hasBeenRead {
+				maxTitleLen -= 2
+			}
+			if maxTitleLen > 10 {
+				titleText = truncateString(titleText, maxTitleLen)
+			}
+
 			// Styled metadata items
 			var pts, author, commentsCount string
 			if hasBeenRead && m.cursor != i {
@@ -705,7 +776,11 @@ func (m *model) updateViewport() {
 		curr := displayStories[m.cursor]
 		var s strings.Builder
 		
-		title := selectedTitleStyle.Width(m.width - 4).Render(curr.Title)
+		titleWidth := m.width - 4
+		if titleWidth < 20 {
+			titleWidth = 20
+		}
+		title := selectedTitleStyle.Width(titleWidth).Render(curr.Title)
 		pts := lipgloss.NewStyle().Foreground(cyan).Render(fmt.Sprintf("%d pts", curr.Score))
 		author := lipgloss.NewStyle().Foreground(orange).Render(curr.By)
 		timeStr := formatTime(curr.Time)
@@ -721,7 +796,11 @@ func (m *model) updateViewport() {
 
 		if curr.Text != "" {
 			text := cleanHTML(curr.Text)
-			s.WriteString(detailStyle.Width(m.width - 8).Render(text) + "\n\n")
+			detailWidth := m.width - 8
+			if detailWidth < 20 {
+				detailWidth = 20
+			}
+			s.WriteString(detailStyle.Width(detailWidth).Render(text) + "\n\n")
 		}
 
 		s.WriteString(headerStyle.Render("── Comments ──") + "\n\n")
@@ -763,9 +842,13 @@ func (m model) renderComments(comments []comment) string {
 		
 		text := cleanHTML(c.item.Text)
 		
+		commentWidth := m.width - indentSize - 10
+		if commentWidth < 20 {
+			commentWidth = 20
+		}
 		styledText := commentStyle.Copy().
 			BorderForeground(commentBorderColor).
-			Width(m.width - indentSize - 10).
+			Width(commentWidth).
 			Render(text)
 
 		s.WriteString(indentStr + author + "\n")
@@ -813,6 +896,7 @@ func (m model) renderHelp() string {
 	table.WriteString(shortcut("Tab / Shift+Tab", "Switch Category") + "\n")
 	table.WriteString(shortcut("1 - 5", "Direct Feed Selection") + "\n")
 	table.WriteString(shortcut("Enter", "Open Details & Comments") + "\n")
+	table.WriteString(shortcut("r", "Reload Feed") + "\n")
 	table.WriteString(shortcut("o", "Open Original Link") + "\n")
 	table.WriteString(shortcut("w", "Write Submission (Browser)") + "\n")
 
@@ -919,6 +1003,7 @@ func (m model) View() string {
 		shortcuts := []string{
 			formatShortcut("q", "quit"),
 			formatShortcut("tab", "feed"),
+			formatShortcut("r", "reload"),
 			formatShortcut("j/k", "nav"),
 			formatShortcut("enter", "view"),
 			formatShortcut("o", "link"),

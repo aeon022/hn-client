@@ -4,9 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 )
 
 const BaseURL = "https://hacker-news.firebaseio.com/v0"
+
+var httpClient = &http.Client{
+	Timeout: 10 * time.Second,
+}
 
 // Item repräsentiert eine Story, einen Kommentar, etc.
 // Wir nutzen "tags" (json:"..."), um Go zu sagen, welches JSON-Feld in welches Struct-Feld gehört.
@@ -27,7 +32,7 @@ type Item struct {
 
 // GetStories holt die IDs der Stories einer bestimmten Kategorie (top, new, best, ask, show).
 func GetStories(category string) ([]int, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/%sstories.json", BaseURL, category))
+	resp, err := httpClient.Get(fmt.Sprintf("%s/%sstories.json", BaseURL, category))
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +48,7 @@ func GetStories(category string) ([]int, error) {
 
 // GetItem holt die Details für eine bestimmte ID.
 func GetItem(id int) (Item, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/item/%d.json", BaseURL, id))
+	resp, err := httpClient.Get(fmt.Sprintf("%s/item/%d.json", BaseURL, id))
 	if err != nil {
 		return Item{}, err
 	}

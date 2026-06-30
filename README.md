@@ -7,11 +7,16 @@ Ein moderner, schneller und minimalistischer Hacker News Client direkt für dein
 ## 🚀 Features
 
 - **Übersichtliche Story-Liste**: Anzeige von Punkten, Autor, Veröffentlichungszeitpunkt und Kommentaranzahl.
+- **Dynamische Titel-Kürzung**: Verhindert unschöne Zeilenumbrüche und Behebung des Scroll-Drifts (Offset-Verschiebung) in der Story-Liste.
 - **Farbige Kategorien (Tabs)**: Einfacher Wechsel zwischen *Top*, *New*, *Best*, *Ask* und *Show* Stories.
+- **Echtzeit-Filterung & Suche**: Filtern der aktuellen Stories nach Titel und Autor mit `/`.
+- **Säuberung von Kommentaren**: Konvertiert HTML-Links (`<a>`) und Code-Formatierungen (`<code>`/`<pre>`) in sauberen Terminal-Text.
 - **Vim-Style Navigation**: Navigieren ganz klassisch mit `j`/`k` oder den Pfeiltasten.
 - **Maus-Support (Hijacked Scroll)**: Nahtloses Scrollen mit dem Mausrad direkt in der Liste und im Kommentarbereich.
 - **Farbcodierte Kommentar-Threads**: Verschachtelte Kommentare haben farbige Ränder je nach Einrückungstiefe für bessere Lesbarkeit.
 - **Browser-Integration**: Öffnen des Original-Links einer Story direkt im Standardbrowser mit `o`.
+- **Globale Lese-Historie**: Ordnerunabhängige Persistenz gelesener Stories unter `~/.hn-history.json` mit automatischer Alt-Daten-Migration.
+- **API-Timeout**: 10-Sekunden-Timeout verhindert unendliche TUI-Freezes bei Netzwerkproblemen.
 
 ---
 
@@ -56,6 +61,7 @@ brew install go
 | `Shift + Tab` | Vorherige Kategorie wählen |
 | `1` bis `5` | Direktwahl der Kategorie (`1`: Top, `2`: New, `3`: Best, `4`: Ask, `5`: Show) |
 | `Enter` | Story-Details & Kommentare öffnen |
+| `r` | Aktiven Feed neu laden (Aktualisieren) |
 | `o` | Original-Link im Standard-Webbrowser öffnen |
 | `/` | Echtzeit-Suche aktivieren (Titel/Autor filtern) |
 | `x` | Aktiven Filter löschen (vollständige Liste anzeigen) |
