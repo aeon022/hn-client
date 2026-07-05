@@ -94,6 +94,7 @@ const (
 
 type config struct {
 	Username string `json:"username"`
+	ShowDead bool   `json:"show_dead"`
 }
 
 func getConfigPath() string {
@@ -163,6 +164,7 @@ type model struct {
 	username               string
 	usernameInput          textinput.Model
 	loginActive            bool
+	showDead               bool
 	history                map[int]int64 // StoryID -> Unix-Zeitstempel des letzten Besuchs
 	currentStoryLastViewed int64         // Zeitstempel des letzten Besuchs der aktuell geöffneten Story
 }
@@ -196,6 +198,7 @@ func initialModel() model {
 		searchInput:   ti,
 		usernameInput: ui,
 		username:      cfg.Username,
+		showDead:      cfg.ShowDead,
 		history:       history,
 	}
 }
@@ -580,7 +583,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.loginActive = false
 				newUsername := strings.TrimSpace(m.usernameInput.Value())
 				m.username = newUsername
-				_ = saveConfig(config{Username: m.username})
+				_ = saveConfig(config{Username: m.username, ShowDead: m.showDead})
 				// If they are on the "mine" category, reload it!
 				if m.category == "mine" {
 					m.loading = true
@@ -684,6 +687,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.updateViewport()
 				return m, textinput.Blink
 			}
+		case "h":
+			if m.state == stateList {
+				m.showDead = !m.showDead
+				_ = saveConfig(config{Username: m.username, ShowDead: m.showDead})
+				m.updateViewport()
+				return m, nil
+			}
 		case "?":
 			m.showHelp = true
 			return m, nil
@@ -786,12 +796,20 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) getDisplayStories() []hnapi.Item {
+	var stories []hnapi.Item
+	for _, item := range m.stories {
+		if !m.showDead && item.Dead {
+			continue
+		}
+		stories = append(stories, item)
+	}
+
 	if m.searchInput.Value() == "" {
-		return m.stories
+		return stories
 	}
 	var filtered []hnapi.Item
 	query := strings.ToLower(m.searchInput.Value())
-	for _, item := range m.stories {
+	for _, item := range stories {
 		if strings.Contains(strings.ToLower(item.Title), query) ||
 			strings.Contains(strings.ToLower(item.By), query) {
 			filtered = append(filtered, item)
@@ -860,14 +878,29 @@ func (m *model) updateViewport() {
 
 			var itemStr string
 			if m.cursor == i {
-				title := selectedTitleStyle.Render(titlePrefix + titleText)
+				var title string
+				if item.Dead {
+					deadLabel := lipgloss.NewStyle().Foreground(lipgloss.Color("#FF0000")).Bold(true).Render("[DEAD] ")
+					title = deadLabel + selectedTitleStyle.Render(titlePrefix + titleText)
+				} else {
+					title = selectedTitleStyle.Render(titlePrefix + titleText)
+				}
 				itemStr = selectedBoxStyle.Render(title + "\n" + metaText)
 			} else {
 				var title string
-				if hasBeenRead {
-					title = readTitleStyle.Render(titlePrefix + titleText)
+				if item.Dead {
+					deadLabel := lipgloss.NewStyle().Foreground(lipgloss.Color("#FF0000")).Bold(true).Render("[DEAD] ")
+					if hasBeenRead {
+						title = deadLabel + readTitleStyle.Render(titlePrefix + titleText)
+					} else {
+						title = deadLabel + unselectedTitleStyle.Render(titlePrefix + titleText)
+					}
 				} else {
-					title = unselectedTitleStyle.Render(titleText)
+					if hasBeenRead {
+						title = readTitleStyle.Render(titlePrefix + titleText)
+					} else {
+						title = unselectedTitleStyle.Render(titleText)
+					}
 				}
 				itemStr = unselectedBoxStyle.Render(title + "\n" + metaText)
 			}
@@ -901,6 +934,10 @@ func (m *model) updateViewport() {
 			titleWidth = 20
 		}
 		title := selectedTitleStyle.Width(titleWidth).Render(curr.Title)
+		if curr.Dead {
+			deadLabel := lipgloss.NewStyle().Foreground(lipgloss.Color("#FF0000")).Bold(true).Render("[DEAD] ")
+			title = deadLabel + title
+		}
 		pts := lipgloss.NewStyle().Foreground(cyan).Render(fmt.Sprintf("%d pts", curr.Score))
 		author := lipgloss.NewStyle().Foreground(orange).Render(curr.By)
 		timeStr := formatTime(curr.Time)
@@ -909,6 +946,16 @@ func (m *model) updateViewport() {
 		
 		s.WriteString(title + "\n")
 		s.WriteString(meta + "\n")
+		if curr.Dead {
+			warningStyle := lipgloss.NewStyle().
+				Foreground(lipgloss.Color("#FF0000")).
+				Border(lipgloss.NormalBorder(), false, false, false, true).
+				BorderForeground(lipgloss.Color("#FF0000")).
+				PaddingLeft(2).
+				MarginTop(1).
+				MarginBottom(1)
+			s.WriteString(warningStyle.Render("⚠️ WARNING: This post has been marked dead or flagged by Hacker News filters.") + "\n")
+		}
 		if curr.URL != "" {
 			s.WriteString(lipgloss.NewStyle().Foreground(gray).Render("Link: "+curr.URL) + "\n")
 		}
@@ -1016,6 +1063,7 @@ func (m model) renderHelp() string {
 	table.WriteString(shortcut("Tab / Shift+Tab", "Switch Category") + "\n")
 	table.WriteString(shortcut("1 - 6", "Direct Category Selection (6: Mine)") + "\n")
 	table.WriteString(shortcut("l", "Set HN Username / Login") + "\n")
+	table.WriteString(shortcut("h", "Toggle Show Dead/Flagged posts") + "\n")
 	table.WriteString(shortcut("Enter", "Open Details & Comments") + "\n")
 	table.WriteString(shortcut("r", "Reload Feed") + "\n")
 	table.WriteString(shortcut("o", "Open Original Link") + "\n")
