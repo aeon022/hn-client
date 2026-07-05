@@ -61,3 +61,28 @@ func GetItem(id int) (Item, error) {
 
 	return item, nil
 }
+
+// User repräsentiert die Profildaten eines Benutzers auf Hacker News.
+type User struct {
+	ID        string `json:"id"`
+	Created   int64  `json:"created"`
+	Karma     int    `json:"karma"`
+	About     string `json:"about"`
+	Submitted []int  `json:"submitted"`
+}
+
+// GetUserSubmissions holt die IDs aller Einreichungen (Stories, Kommentare, etc.) eines Benutzers.
+func GetUserSubmissions(username string) ([]int, error) {
+	resp, err := httpClient.Get(fmt.Sprintf("%s/user/%s.json", BaseURL, username))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var u User
+	if err := json.NewDecoder(resp.Body).Decode(&u); err != nil {
+		return nil, err
+	}
+
+	return u.Submitted, nil
+}

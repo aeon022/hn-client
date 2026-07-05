@@ -83,7 +83,7 @@ var (
 		Border(lipgloss.NormalBorder(), true, false, false, false)
 )
 
-var categories = []string{"top", "new", "best", "ask", "show"}
+var categories = []string{"top", "new", "best", "ask", "show", "mine"}
 
 type state int
 
@@ -91,6 +91,39 @@ const (
 	stateList state = iota
 	stateDetail
 )
+
+type config struct {
+	Username string `json:"username"`
+}
+
+func getConfigPath() string {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return ".hn-config.json"
+	}
+	return home + "/.hn-config.json"
+}
+
+func saveConfig(cfg config) error {
+	data, err := json.Marshal(cfg)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(getConfigPath(), data, 0600)
+}
+
+func loadConfig() (config, error) {
+	path := getConfigPath()
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return config{}, err
+	}
+	var cfg config
+	if err := json.Unmarshal(data, &cfg); err != nil {
+		return config{}, err
+	}
+	return cfg, nil
+}
 
 // statusMsg wird gesendet, wenn die Story-Liste geladen ist.
 type statusMsg []hnapi.Item
@@ -127,6 +160,9 @@ type model struct {
 	showHelp               bool
 	searchActive           bool
 	searchInput            textinput.Model
+	username               string
+	usernameInput          textinput.Model
+	loginActive            bool
 	history                map[int]int64 // StoryID -> Unix-Zeitstempel des letzten Besuchs
 	currentStoryLastViewed int64         // Zeitstempel des letzten Besuchs der aktuell geöffneten Story
 }
@@ -139,18 +175,28 @@ func initialModel() model {
 	ti.TextStyle = lipgloss.NewStyle().Foreground(white)
 	ti.PlaceholderStyle = lipgloss.NewStyle().Foreground(gray)
 
+	ui := textinput.New()
+	ui.Placeholder = "HN Username..."
+	ui.CharLimit = 50
+	ui.Width = 20
+	ui.TextStyle = lipgloss.NewStyle().Foreground(white)
+	ui.PlaceholderStyle = lipgloss.NewStyle().Foreground(gray)
+
 	history, _ := loadHistory()
+	cfg, _ := loadConfig()
 
 	return model{
-		loading:      true,
-		comments:     make(map[int][]comment),
-		cursor:       0,
-		state:        stateList,
-		category:     "top",
-		showHelp:     false,
-		searchActive: false,
-		searchInput:  ti,
-		history:      history,
+		loading:       true,
+		comments:      make(map[int][]comment),
+		cursor:        0,
+		state:         stateList,
+		category:      "top",
+		showHelp:      false,
+		searchActive:  false,
+		searchInput:   ti,
+		usernameInput: ui,
+		username:      cfg.Username,
+		history:       history,
 	}
 }
 
@@ -312,17 +358,32 @@ func openURL(url string) tea.Cmd {
 	}
 }
 
-func fetchStories(category string) tea.Cmd {
+func fetchStories(category string, username string) tea.Cmd {
 	return func() tea.Msg {
-		ids, err := hnapi.GetStories(category)
+		var ids []int
+		var err error
+		if category == "mine" {
+			if username == "" {
+				return statusMsg(nil)
+			}
+			ids, err = hnapi.GetUserSubmissions(username)
+		} else {
+			ids, err = hnapi.GetStories(category)
+		}
 		if err != nil {
 			return errMsg{err}
 		}
-		const limit = 20
-		stories := make([]hnapi.Item, limit)
+
+		const limit = 30
+		fetchLimit := limit
+		if category == "mine" {
+			fetchLimit = 50 // Fetch more IDs in case there are many comments to filter out
+		}
+
+		stories := make([]hnapi.Item, fetchLimit)
 		var wg sync.WaitGroup
 		var mu sync.Mutex
-		for i := 0; i < limit && i < len(ids); i++ {
+		for i := 0; i < fetchLimit && i < len(ids); i++ {
 			wg.Add(1)
 			go func(index, id int) {
 				defer wg.Done()
@@ -335,11 +396,19 @@ func fetchStories(category string) tea.Cmd {
 			}(i, ids[i])
 		}
 		wg.Wait()
+
 		var finalStories []hnapi.Item
 		for _, s := range stories {
 			if s.ID != 0 {
+				if category == "mine" && s.Type != "story" && s.Type != "poll" {
+					continue
+				}
 				finalStories = append(finalStories, s)
 			}
+		}
+
+		if len(finalStories) > limit {
+			finalStories = finalStories[:limit]
 		}
 		return statusMsg(finalStories)
 	}
@@ -412,7 +481,7 @@ func loadHistory() (map[int]int64, error) {
 }
 
 func (m model) Init() tea.Cmd {
-	return fetchStories(m.category)
+	return fetchStories(m.category, m.username)
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -461,11 +530,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.MouseMsg:
-		if m.showHelp || m.searchActive {
+		if m.showHelp || m.searchActive || m.loginActive {
 			return m, nil
 		}
 		if m.state == stateList {
 			switch msg.Button {
+			case tea.MouseButtonLeft:
+				if msg.Y == 0 && msg.X >= m.width-25 {
+					m.loginActive = true
+					m.usernameInput.Focus()
+					m.usernameInput.SetValue(m.username)
+					m.updateViewport()
+					return m, textinput.Blink
+				}
 			case tea.MouseButtonWheelUp:
 				if m.cursor > 0 {
 					m.cursor--
@@ -491,6 +568,33 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 
+
+		if m.loginActive {
+			switch msg.String() {
+			case "esc":
+				m.loginActive = false
+				m.usernameInput.SetValue("")
+				m.updateViewport()
+				return m, nil
+			case "enter":
+				m.loginActive = false
+				newUsername := strings.TrimSpace(m.usernameInput.Value())
+				m.username = newUsername
+				_ = saveConfig(config{Username: m.username})
+				// If they are on the "mine" category, reload it!
+				if m.category == "mine" {
+					m.loading = true
+					m.cursor = 0
+					m.viewport.YOffset = 0
+					m.updateViewport()
+					return m, fetchStories(m.category, m.username)
+				}
+				m.updateViewport()
+				return m, nil
+			}
+			m.usernameInput, cmd = m.usernameInput.Update(msg)
+			return m, cmd
+		}
 
 		if m.searchActive {
 			switch msg.String() {
@@ -541,7 +645,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.cursor = 0
 				m.viewport.YOffset = 0
 				m.searchInput.SetValue("") // Clear filter on category change
-				return m, fetchStories(m.category)
+				return m, fetchStories(m.category, m.username)
 			}
 		case "shift+tab":
 			if m.state == stateList {
@@ -558,9 +662,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.cursor = 0
 				m.viewport.YOffset = 0
 				m.searchInput.SetValue("") // Clear filter on category change
-				return m, fetchStories(m.category)
+				return m, fetchStories(m.category, m.username)
 			}
-		case "1", "2", "3", "4", "5":
+		case "1", "2", "3", "4", "5", "6":
 			if m.state == stateList {
 				idx := int(msg.String()[0] - '1')
 				if idx >= 0 && idx < len(categories) {
@@ -569,8 +673,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.cursor = 0
 					m.viewport.YOffset = 0
 					m.searchInput.SetValue("") // Clear filter on category change
-					return m, fetchStories(m.category)
+					return m, fetchStories(m.category, m.username)
 				}
+			}
+		case "l":
+			if m.state == stateList {
+				m.loginActive = true
+				m.usernameInput.Focus()
+				m.usernameInput.SetValue(m.username)
+				m.updateViewport()
+				return m, textinput.Blink
 			}
 		case "?":
 			m.showHelp = true
@@ -591,7 +703,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.loading = true
 				m.cursor = 0
 				m.viewport.YOffset = 0
-				return m, fetchStories(m.category)
+				return m, fetchStories(m.category, m.username)
 			}
 		case "q", "ctrl+c":
 			if m.state == stateDetail {
@@ -696,6 +808,14 @@ func (m *model) updateViewport() {
 	var content string
 	if m.state == stateList {
 		var s strings.Builder
+		if m.category == "mine" && m.username == "" {
+			s.WriteString("\n\n  " + lipgloss.NewStyle().Foreground(orange).Bold(true).Render("No HN Username configured!") + "\n\n")
+			s.WriteString("  Press " + lipgloss.NewStyle().Foreground(white).Bold(true).Render("L") + " (or click Login top-right) to enter your\n")
+			s.WriteString("  username and see your posts.\n")
+			m.viewport.SetContent(s.String())
+			return
+		}
+
 		displayStories := m.getDisplayStories()
 		
 		// Sicherstellen, dass der Cursor im Bereich der gefilterten Stories liegt
@@ -751,7 +871,7 @@ func (m *model) updateViewport() {
 				}
 				itemStr = unselectedBoxStyle.Render(title + "\n" + metaText)
 			}
-			s.WriteString(itemStr + "\n\n")
+			s.WriteString(itemStr + "\n")
 		}
 		content = s.String()
 
@@ -894,7 +1014,8 @@ func (m model) renderHelp() string {
 	table.WriteString(shortcut("j / k / ↓ / ↑", "Navigate") + "\n")
 	table.WriteString(shortcut("Mouse Wheel", "Scroll / Move Cursor") + "\n")
 	table.WriteString(shortcut("Tab / Shift+Tab", "Switch Category") + "\n")
-	table.WriteString(shortcut("1 - 5", "Direct Feed Selection") + "\n")
+	table.WriteString(shortcut("1 - 6", "Direct Category Selection (6: Mine)") + "\n")
+	table.WriteString(shortcut("l", "Set HN Username / Login") + "\n")
 	table.WriteString(shortcut("Enter", "Open Details & Comments") + "\n")
 	table.WriteString(shortcut("r", "Reload Feed") + "\n")
 	table.WriteString(shortcut("o", "Open Original Link") + "\n")
@@ -973,6 +1094,18 @@ func (m model) View() string {
 		if m.searchInput.Value() != "" {
 			headerText += lipgloss.NewStyle().Foreground(gray).Italic(true).Render(fmt.Sprintf("  (Filter: %q)", m.searchInput.Value()))
 		}
+
+		// Append the Right-aligned Login Button!
+		loginText := " [L] Login "
+		if m.username != "" {
+			loginText = " [L] User: " + m.username + " "
+		}
+		spaceCount := m.width - lipgloss.Width(headerText) - lipgloss.Width(loginText)
+		if spaceCount > 0 {
+			headerText += strings.Repeat(" ", spaceCount) + lipgloss.NewStyle().Foreground(orange).Bold(true).Render(loginText)
+		} else {
+			headerText += "  " + lipgloss.NewStyle().Foreground(orange).Bold(true).Render(loginText)
+		}
 	} else {
 		// Header in reader mode
 		headerText = titleStyle.Render(" HACKER NEWS ") + "  │  " + lipgloss.NewStyle().Foreground(orange).Bold(true).Render("READER MODE (Comments)")
@@ -982,19 +1115,22 @@ func (m model) View() string {
 	divider := lipgloss.NewStyle().Foreground(darkGray).Render(strings.Repeat("─", m.width))
 	header := fmt.Sprintf("%s\n%s\n", headerText, divider)
 
-	if m.loading {
-		return headerText + "\n" + divider + "\n\n  " + lipgloss.NewStyle().Foreground(orange).Render("⌛ Loading...")
-	}
-
 	var content string
 	if m.showHelp {
 		content = m.renderHelp()
+	} else if m.loading {
+		content = "\n\n  " + lipgloss.NewStyle().Foreground(orange).Render("⌛ Loading...")
 	} else {
 		content = m.viewport.View()
 	}
 
 	var footer string
-	if m.searchActive {
+	if m.loginActive {
+		loginLabel := lipgloss.NewStyle().Foreground(white).Bold(true).Render(" 👤 HN Username: ")
+		footer = footerStyle.Width(m.width).Render(
+			loginLabel + m.usernameInput.View() + lipgloss.NewStyle().Foreground(lightGray).Render("  (Esc: Cancel / Enter: Save)"),
+		)
+	} else if m.searchActive {
 		searchLabel := lipgloss.NewStyle().Foreground(white).Bold(true).Render(" 🔍 Search: ")
 		footer = footerStyle.Width(m.width).Render(
 			searchLabel + m.searchInput.View() + lipgloss.NewStyle().Foreground(lightGray).Render("  (Esc: Cancel / Enter: Apply)"),
@@ -1004,6 +1140,7 @@ func (m model) View() string {
 			formatShortcut("q", "quit"),
 			formatShortcut("tab", "feed"),
 			formatShortcut("r", "reload"),
+			formatShortcut("l", "login"),
 			formatShortcut("j/k", "nav"),
 			formatShortcut("enter", "view"),
 			formatShortcut("o", "link"),
