@@ -26,6 +26,7 @@ func Login(username, password string) (*Client, error) {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
 
 	// Redirects unterbinden, um den Set-Cookie Header der 302-Antwort lesen zu können.
 	client := &http.Client{
@@ -63,8 +64,13 @@ func (c *Client) SubmitStory(title, urlStr, text string) error {
 		return err
 	}
 	req.Header.Set("Cookie", fmt.Sprintf("user=%s", c.Cookie))
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
 
-	client := &http.Client{}
+	client := &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
@@ -99,12 +105,13 @@ func (c *Client) SubmitStory(title, urlStr, text string) error {
 		formData.Set("text", text)
 	}
 
-	postReq, err := http.NewRequest("POST", "https://news.ycombinator.com/submit", strings.NewReader(formData.Encode()))
+	postReq, err := http.NewRequest("POST", "https://news.ycombinator.com/r", strings.NewReader(formData.Encode()))
 	if err != nil {
 		return err
 	}
 	postReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	postReq.Header.Set("Cookie", fmt.Sprintf("user=%s", c.Cookie))
+	postReq.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
 
 	postResp, err := client.Do(postReq)
 	if err != nil {
@@ -112,12 +119,38 @@ func (c *Client) SubmitStory(title, urlStr, text string) error {
 	}
 	defer postResp.Body.Close()
 
-	// 302 Found nach Erfolg
-	if postResp.StatusCode != http.StatusFound && postResp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Fehler beim Veröffentlichen: HTTP Status %d", postResp.StatusCode)
+	if postResp.StatusCode == http.StatusFound {
+		return nil
 	}
 
-	return nil
+	if postResp.StatusCode == http.StatusOK {
+		bodyBytes, _ := io.ReadAll(postResp.Body)
+		bodyText := string(bodyBytes)
+
+		if strings.Contains(bodyText, "already been submitted") {
+			return errors.New("Diese URL wurde bereits eingereicht.")
+		}
+		if strings.Contains(bodyText, "too fast") {
+			return errors.New("Du postest zu schnell. Bitte warte einige Minuten.")
+		}
+
+		cleanRegex := regexp.MustCompile("<[^>]*>")
+		plainText := cleanRegex.ReplaceAllString(bodyText, " ")
+		plainText = regexp.MustCompile(`\s+`).ReplaceAllString(plainText, " ")
+		plainText = strings.TrimSpace(plainText)
+
+		if len(plainText) > 0 {
+			runes := []rune(plainText)
+			if len(runes) > 150 {
+				plainText = string(runes[:150]) + "..."
+			}
+			return fmt.Errorf("HN: %s", plainText)
+		}
+
+		return errors.New("Beitrag wurde von Hacker News abgelehnt.")
+	}
+
+	return fmt.Errorf("Fehler beim Veröffentlichen: HTTP Status %d", postResp.StatusCode)
 }
 
 // SubmitComment antwortet auf eine Story oder einen Kommentar.
@@ -129,8 +162,13 @@ func (c *Client) SubmitComment(parentID int, text string) error {
 		return err
 	}
 	req.Header.Set("Cookie", fmt.Sprintf("user=%s", c.Cookie))
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
 
-	client := &http.Client{}
+	client := &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
@@ -173,6 +211,7 @@ func (c *Client) SubmitComment(parentID int, text string) error {
 	}
 	postReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	postReq.Header.Set("Cookie", fmt.Sprintf("user=%s", c.Cookie))
+	postReq.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
 
 	postResp, err := client.Do(postReq)
 	if err != nil {
@@ -180,5 +219,33 @@ func (c *Client) SubmitComment(parentID int, text string) error {
 	}
 	defer postResp.Body.Close()
 
-	return nil
+	if postResp.StatusCode == http.StatusFound {
+		return nil
+	}
+
+	if postResp.StatusCode == http.StatusOK {
+		bodyBytes, _ := io.ReadAll(postResp.Body)
+		bodyText := string(bodyBytes)
+
+		if strings.Contains(bodyText, "too fast") {
+			return errors.New("Du postest zu schnell. Bitte warte einige Minuten.")
+		}
+
+		cleanRegex := regexp.MustCompile("<[^>]*>")
+		plainText := cleanRegex.ReplaceAllString(bodyText, " ")
+		plainText = regexp.MustCompile(`\s+`).ReplaceAllString(plainText, " ")
+		plainText = strings.TrimSpace(plainText)
+
+		if len(plainText) > 0 {
+			runes := []rune(plainText)
+			if len(runes) > 150 {
+				plainText = string(runes[:150]) + "..."
+			}
+			return fmt.Errorf("HN: %s", plainText)
+		}
+
+		return errors.New("Kommentar wurde von Hacker News abgelehnt.")
+	}
+
+	return fmt.Errorf("Fehler beim Kommentieren: HTTP Status %d", postResp.StatusCode)
 }

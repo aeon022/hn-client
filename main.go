@@ -83,18 +83,20 @@ var (
 		Border(lipgloss.NormalBorder(), true, false, false, false)
 )
 
-var categories = []string{"top", "new", "best", "ask", "show", "mine"}
-
-type state int
+type writeStep int
 
 const (
-	stateList state = iota
-	stateDetail
+	stepNone writeStep = iota
+	stepLoginPassword
+	stepStoryWriting
+	stepCommentWriting
 )
 
 type config struct {
-	Username string `json:"username"`
-	ShowDead bool   `json:"show_dead"`
+	Username      string `json:"username"`
+	ShowDead      bool   `json:"show_dead"`
+	UseGUIBrowser bool   `json:"use_gui_browser"`
+	Cookie        string `json:"cookie"`
 }
 
 func getConfigPath() string {
@@ -126,6 +128,27 @@ func loadConfig() (config, error) {
 	return cfg, nil
 }
 
+func getLogPath() string {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "hn-client.log"
+	}
+	return home + "/.hn-client.log"
+}
+
+func logError(format string, args ...interface{}) {
+	path := getLogPath()
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+
+	timestamp := time.Now().Format("2006-01-02 15:04:05")
+	msg := fmt.Sprintf(format, args...)
+	_, _ = fmt.Fprintf(f, "[%s] %s\n", timestamp, msg)
+}
+
 // statusMsg wird gesendet, wenn die Story-Liste geladen ist.
 type statusMsg []hnapi.Item
 
@@ -145,6 +168,15 @@ type errMsg struct{ err error }
 
 func (e errMsg) Error() string { return e.err.Error() }
 
+type state int
+
+const (
+	stateList state = iota
+	stateDetail
+)
+
+var categories = []string{"top", "new", "best", "ask", "show", "mine"}
+
 type model struct {
 	stories                []hnapi.Item
 	comments               map[int][]comment
@@ -163,8 +195,15 @@ type model struct {
 	searchInput            textinput.Model
 	username               string
 	usernameInput          textinput.Model
+	passwordInput          textinput.Model
+	cookie                 string
+	writeStep              writeStep
+	submitting             bool
+	wizardError            string
 	loginActive            bool
 	showDead               bool
+	useGUIBrowser          bool
+	lastBrowserOpen        time.Time
 	history                map[int]int64 // StoryID -> Unix-Zeitstempel des letzten Besuchs
 	currentStoryLastViewed int64         // Zeitstempel des letzten Besuchs der aktuell geöffneten Story
 }
@@ -184,6 +223,14 @@ func initialModel() model {
 	ui.TextStyle = lipgloss.NewStyle().Foreground(white)
 	ui.PlaceholderStyle = lipgloss.NewStyle().Foreground(gray)
 
+	pi := textinput.New()
+	pi.Placeholder = "Password..."
+	pi.EchoMode = textinput.EchoPassword
+	pi.CharLimit = 100
+	pi.Width = 30
+	pi.TextStyle = lipgloss.NewStyle().Foreground(white)
+	pi.PlaceholderStyle = lipgloss.NewStyle().Foreground(gray)
+
 	history, _ := loadHistory()
 	cfg, _ := loadConfig()
 
@@ -197,8 +244,12 @@ func initialModel() model {
 		searchActive:  false,
 		searchInput:   ti,
 		usernameInput: ui,
+		passwordInput: pi,
 		username:      cfg.Username,
 		showDead:      cfg.ShowDead,
+		useGUIBrowser: cfg.UseGUIBrowser,
+		cookie:        cfg.Cookie,
+		writeStep:     stepNone,
 		history:       history,
 	}
 }
@@ -283,25 +334,27 @@ func formatTime(unixTime int64) string {
 	}
 }
 
-func openURL(url string) tea.Cmd {
+func openURL(url string, useGUI bool) tea.Cmd {
 	// 1. Browser suchen
-	browsers := []string{
-		"w3m", "/opt/homebrew/bin/w3m", "/usr/local/bin/w3m",
-		"lynx", "/opt/homebrew/bin/lynx", "/usr/local/bin/lynx", "/usr/bin/lynx",
-		"links", "/opt/homebrew/bin/links",
-	}
-
 	var browser string
-	for _, b := range browsers {
-		if strings.Contains(b, "/") {
-			if _, err := os.Stat(b); err == nil {
-				browser = b
-				break
-			}
-		} else {
-			if path, err := exec.LookPath(b); err == nil {
-				browser = path
-				break
+	if !useGUI {
+		browsers := []string{
+			"w3m", "/opt/homebrew/bin/w3m", "/usr/local/bin/w3m",
+			"lynx", "/opt/homebrew/bin/lynx", "/usr/local/bin/lynx", "/usr/bin/lynx",
+			"links", "/opt/homebrew/bin/links",
+		}
+
+		for _, b := range browsers {
+			if strings.Contains(b, "/") {
+				if _, err := os.Stat(b); err == nil {
+					browser = b
+					break
+				}
+			} else {
+				if path, err := exec.LookPath(b); err == nil {
+					browser = path
+					break
+				}
 			}
 		}
 	}
@@ -359,6 +412,232 @@ func openURL(url string) tea.Cmd {
 			return nil
 		}
 	}
+}
+
+type loginResultMsg struct {
+	cookie string
+	err    error
+}
+
+type submitResultMsg struct {
+	err error
+}
+
+func doLogin(username, password string) tea.Cmd {
+	return func() tea.Msg {
+		client, err := hnapi.Login(username, password)
+		if err != nil {
+			return loginResultMsg{err: err}
+		}
+		return loginResultMsg{cookie: client.Cookie}
+	}
+}
+
+func doSubmitStory(cookie, title, urlStr, text string) tea.Cmd {
+	return func() tea.Msg {
+		client := &hnapi.Client{Cookie: cookie}
+		err := client.SubmitStory(title, urlStr, text)
+		return submitResultMsg{err: err}
+	}
+}
+
+func doSubmitComment(cookie string, parentID int, text string) tea.Cmd {
+	return func() tea.Msg {
+		client := &hnapi.Client{Cookie: cookie}
+		err := client.SubmitComment(parentID, text)
+		return submitResultMsg{err: err}
+	}
+}
+
+type externalEditorMsg struct {
+	filePath string
+	err      error
+}
+
+func runExternalEditor(filePath string) tea.Cmd {
+	editor := os.Getenv("EDITOR")
+	if editor == "" {
+		editor = "vim"
+	}
+	if _, err := exec.LookPath(editor); err != nil && editor == "vim" {
+		editor = "nano"
+	}
+	c := exec.Command(editor, filePath)
+	return tea.ExecProcess(c, func(err error) tea.Msg {
+		return externalEditorMsg{filePath: filePath, err: err}
+	})
+}
+
+func (m model) startStoryEditor() (model, tea.Cmd) {
+	tmpFile, err := os.CreateTemp("", "hn-story-*.md")
+	if err != nil {
+		m.wizardError = fmt.Sprintf("Temp-Datei Fehler: %v", err)
+		m.writeStep = stepNone
+		return m, nil
+	}
+	defer tmpFile.Close()
+
+	template := "---\nTitle: \nURL: \n---\n" +
+		"=== SCHREIBE DEINEN TEXT UNTER DIESER ZEILE / WRITE YOUR TEXT BELOW THIS LINE ===\n" +
+		"# HINWEIS / NOTE (Hacker News Regeln):\n" +
+		"# - Wenn du oben eine 'URL' einträgst, wird dieser Textbereich unten IGNORIERT (Link-Post).\n" +
+		"# - Wenn du einen reinen Text-Beitrag schreiben willst, lasse das Feld 'URL' oben LEER.\n" +
+		"# - If you enter a 'URL' above, this text section below will be IGNORED (Link Post).\n" +
+		"# - If you want to submit a text-only post, leave the 'URL' field above completely EMPTY.\n"
+
+	if _, err := tmpFile.WriteString(template); err != nil {
+		_ = os.Remove(tmpFile.Name())
+		m.wizardError = fmt.Sprintf("Schreibfehler: %v", err)
+		m.writeStep = stepNone
+		return m, nil
+	}
+
+	m.writeStep = stepStoryWriting
+	return m, runExternalEditor(tmpFile.Name())
+}
+
+func (m model) startCommentEditor() (model, tea.Cmd) {
+	tmpFile, err := os.CreateTemp("", "hn-comment-*.md")
+	if err != nil {
+		m.wizardError = fmt.Sprintf("Temp-Datei Fehler: %v", err)
+		m.writeStep = stepNone
+		return m, nil
+	}
+	defer tmpFile.Close()
+
+	template := "=== SCHREIBE DEINE ANTWORT UNTER DIESER ZEILE / WRITE YOUR REPLY BELOW THIS LINE ===\n" +
+		"# (Alles unter dieser Zeile wird als Antwort übermittelt. Du kannst Markdown verwenden.)\n"
+
+	if _, err := tmpFile.WriteString(template); err != nil {
+		_ = os.Remove(tmpFile.Name())
+		m.wizardError = fmt.Sprintf("Schreibfehler: %v", err)
+		m.writeStep = stepNone
+		return m, nil
+	}
+
+	m.writeStep = stepCommentWriting
+	return m, runExternalEditor(tmpFile.Name())
+}
+
+func markdownToHN(md string) string {
+	// 1. Markdown Links konvertieren: [text](url) -> text (url)
+	linkRegex := regexp.MustCompile(`\[([^\]]+)\]\(([^)]+)\)`)
+	md = linkRegex.ReplaceAllStringFunc(md, func(match string) string {
+		sub := linkRegex.FindStringSubmatch(match)
+		if len(sub) < 3 {
+			return match
+		}
+		text := sub[1]
+		url := sub[2]
+		if text == url || strings.TrimSuffix(text, "/") == strings.TrimSuffix(url, "/") {
+			return url
+		}
+		return fmt.Sprintf("%s (%s)", text, url)
+	})
+
+	// 2. Bold text konvertieren: **text** -> *text*
+	boldRegex := regexp.MustCompile(`\*\*([^*]+)\*\*`)
+	md = boldRegex.ReplaceAllString(md, "*$1*")
+
+	// 3. Fenced Code Blocks konvertieren: ```go ... ``` -> 2-Space Einrückung
+	lines := strings.Split(md, "\n")
+	var result []string
+	inCodeBlock := false
+	for _, line := range lines {
+		if strings.HasPrefix(strings.TrimSpace(line), "```") {
+			inCodeBlock = !inCodeBlock
+			continue
+		}
+		if inCodeBlock {
+			result = append(result, "  "+line)
+		} else {
+			result = append(result, line)
+		}
+	}
+	return strings.Join(result, "\n")
+}
+
+func parseStoryFile(content string) (title, urlStr, body string, err error) {
+	sep := "=== SCHREIBE DEINEN TEXT UNTER DIESER ZEILE / WRITE YOUR TEXT BELOW THIS LINE ==="
+	parts := strings.SplitN(content, sep, 2)
+	
+	frontmatter := content
+	if len(parts) == 2 {
+		frontmatter = parts[0]
+		body = parts[1]
+	}
+
+	// Parse frontmatter
+	lines := strings.Split(frontmatter, "\n")
+	inFrontmatter := false
+	frontmatterDone := false
+
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "---" {
+			if !inFrontmatter && !frontmatterDone {
+				inFrontmatter = true
+			} else if inFrontmatter {
+				inFrontmatter = false
+				frontmatterDone = true
+			}
+			continue
+		}
+
+		if inFrontmatter {
+			parts := strings.SplitN(line, ":", 2)
+			if len(parts) == 2 {
+				key := strings.ToLower(strings.TrimSpace(parts[0]))
+				val := strings.TrimSpace(parts[1])
+				if key == "title" || key == "titel" {
+					title = val
+				} else if key == "url" || key == "link" {
+					urlStr = val
+				}
+			}
+		}
+	}
+
+	// Strip leading lines starting with # from the body (instructions)
+	bodyLines := strings.Split(body, "\n")
+	var cleanedBody []string
+	seenContent := false
+	for _, line := range bodyLines {
+		trimmed := strings.TrimSpace(line)
+		if !seenContent && (strings.HasPrefix(trimmed, "#") || trimmed == "") {
+			continue
+		}
+		seenContent = true
+		cleanedBody = append(cleanedBody, line)
+	}
+
+	body = strings.TrimSpace(strings.Join(cleanedBody, "\n"))
+	return title, urlStr, body, nil
+}
+
+func parseCommentFile(content string) string {
+	sep := "=== SCHREIBE DEINE ANTWORT UNTER DIESER ZEILE / WRITE YOUR REPLY BELOW THIS LINE ==="
+	parts := strings.SplitN(content, sep, 2)
+	
+	body := content
+	if len(parts) == 2 {
+		body = parts[1]
+	}
+
+	// Strip leading lines starting with # from the body (instructions)
+	bodyLines := strings.Split(body, "\n")
+	var cleanedBody []string
+	seenContent := false
+	for _, line := range bodyLines {
+		trimmed := strings.TrimSpace(line)
+		if !seenContent && (strings.HasPrefix(trimmed, "#") || trimmed == "") {
+			continue
+		}
+		seenContent = true
+		cleanedBody = append(cleanedBody, line)
+	}
+
+	return strings.TrimSpace(strings.Join(cleanedBody, "\n"))
 }
 
 func fetchStories(category string, username string) tea.Cmd {
@@ -512,6 +791,144 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.width = msg.Width
 		m.height = msg.Height
 
+	case loginResultMsg:
+		m.submitting = false
+		if msg.err != nil {
+			logError("Login fehlgeschlagen (Benutzer: %q): %v", m.username, msg.err)
+			m.wizardError = msg.err.Error()
+			m.passwordInput.SetValue("")
+			m.passwordInput.Focus()
+			m.updateViewport()
+			return m, textinput.Blink
+		}
+		m.cookie = msg.cookie
+		_ = saveConfig(config{
+			Username:      m.username,
+			ShowDead:      m.showDead,
+			UseGUIBrowser: m.useGUIBrowser,
+			Cookie:        m.cookie,
+		})
+		
+		if m.state == stateList {
+			m, cmd = m.startStoryEditor()
+			return m, cmd
+		} else {
+			m, cmd = m.startCommentEditor()
+			return m, cmd
+		}
+
+	case submitResultMsg:
+		m.submitting = false
+		m.writeStep = stepNone
+		if msg.err != nil {
+			logError("Submission fehlgeschlagen: %v", msg.err)
+			m.wizardError = msg.err.Error()
+			m.updateViewport()
+			return m, nil
+		}
+		m.loading = true
+		if m.state == stateList {
+			m.cursor = 0
+			m.viewport.YOffset = 0
+			m.updateViewport()
+			return m, fetchStories(m.category, m.username)
+		} else {
+			displayStories := m.getDisplayStories()
+			if len(displayStories) > 0 {
+				story := displayStories[m.cursor]
+				m.loadingComments = true
+				delete(m.comments, story.ID)
+				m.updateViewport()
+				return m, func() tea.Msg {
+					c := fetchComments(story.ID, story.Kids, 0)
+					return commentsMsg{storyID: story.ID, comments: c}
+				}
+			}
+			m.updateViewport()
+			return m, nil
+		}
+
+	case externalEditorMsg:
+		m.submitting = false
+		if msg.err != nil {
+			logError("Vim/Editor fehlgeschlagen: %v", msg.err)
+			m.wizardError = fmt.Sprintf("Editor Fehler: %v", msg.err)
+			m.writeStep = stepNone
+			m.updateViewport()
+			return m, nil
+		}
+
+		data, err := os.ReadFile(msg.filePath)
+		_ = os.Remove(msg.filePath)
+		if err != nil {
+			logError("Temp-Datei Lesefehler (%q): %v", msg.filePath, err)
+			m.wizardError = fmt.Sprintf("Datei-Lesefehler: %v", err)
+			m.writeStep = stepNone
+			m.updateViewport()
+			return m, nil
+		}
+
+		content := string(data)
+
+		if m.writeStep == stepStoryWriting {
+			title, urlStr, body, err := parseStoryFile(content)
+			if err != nil {
+				logError("Story-Template-Parsing fehlgeschlagen: %v", err)
+				m.wizardError = err.Error()
+				m.writeStep = stepNone
+				m.updateViewport()
+				return m, nil
+			}
+
+			title = strings.TrimSpace(title)
+			urlStr = strings.TrimSpace(urlStr)
+			body = markdownToHN(body)
+
+			if title == "" {
+				m.wizardError = "Story Title darf nicht leer sein!"
+				m.writeStep = stepNone
+				m.updateViewport()
+				return m, nil
+			}
+
+			if urlStr == "" && body == "" {
+				m.wizardError = "Entweder URL oder Text angeben!"
+				m.writeStep = stepNone
+				m.updateViewport()
+				return m, nil
+			}
+
+			m.submitting = true
+			m.updateViewport()
+			return m, doSubmitStory(m.cookie, title, urlStr, body)
+
+		} else if m.writeStep == stepCommentWriting {
+			body := parseCommentFile(content)
+			body = markdownToHN(body)
+
+			if body == "" {
+				m.writeStep = stepNone
+				m.updateViewport()
+				return m, nil
+			}
+
+			displayStories := m.getDisplayStories()
+			if len(displayStories) == 0 {
+				m.writeStep = stepNone
+				m.updateViewport()
+				return m, nil
+			}
+			story := displayStories[m.cursor]
+
+			m.submitting = true
+			m.updateViewport()
+			return m, doSubmitComment(m.cookie, story.ID, body)
+		}
+
+		m.writeStep = stepNone
+		m.updateViewport()
+		return m, nil
+
 	case statusMsg:
 		m.stories = msg
 		m.loading = false
@@ -526,6 +943,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case errMsg:
+		logError("Genereller App-Fehler: %v", msg.err)
 		m.err = msg.err
 		m.loading = false
 		m.loadingComments = false
@@ -533,7 +951,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.MouseMsg:
-		if m.showHelp || m.searchActive || m.loginActive {
+		if m.showHelp || m.searchActive || m.loginActive || m.writeStep != stepNone || m.submitting {
 			return m, nil
 		}
 		if m.state == stateList {
@@ -562,6 +980,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case tea.KeyMsg:
+		if m.wizardError != "" {
+			m.wizardError = ""
+			m.updateViewport()
+			return m, nil
+		}
+
 		if m.showHelp {
 			switch msg.String() {
 			case "?", "esc", "q", "enter", "space":
@@ -571,6 +995,40 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 
+
+		if m.submitting {
+			if msg.String() == "ctrl+c" {
+				return m, tea.Quit
+			}
+			return m, nil
+		}
+
+		if m.writeStep != stepNone {
+			m.wizardError = ""
+			switch m.writeStep {
+			case stepLoginPassword:
+				switch msg.String() {
+				case "esc":
+					m.writeStep = stepNone
+					m.passwordInput.SetValue("")
+					m.updateViewport()
+					return m, nil
+				case "enter":
+					password := strings.TrimSpace(m.passwordInput.Value())
+					m.passwordInput.SetValue("")
+					if password == "" {
+						m.writeStep = stepNone
+						m.updateViewport()
+						return m, nil
+					}
+					m.submitting = true
+					m.updateViewport()
+					return m, doLogin(m.username, password)
+				}
+				m.passwordInput, cmd = m.passwordInput.Update(msg)
+				return m, cmd
+			}
+		}
 
 		if m.loginActive {
 			switch msg.String() {
@@ -582,8 +1040,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "enter":
 				m.loginActive = false
 				newUsername := strings.TrimSpace(m.usernameInput.Value())
-				m.username = newUsername
-				_ = saveConfig(config{Username: m.username, ShowDead: m.showDead})
+				if newUsername != m.username {
+					m.username = newUsername
+					m.cookie = "" // Clear cookie if username changes
+				}
+				_ = saveConfig(config{Username: m.username, ShowDead: m.showDead, UseGUIBrowser: m.useGUIBrowser, Cookie: m.cookie})
 				// If they are on the "mine" category, reload it!
 				if m.category == "mine" {
 					m.loading = true
@@ -690,16 +1151,36 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "h":
 			if m.state == stateList {
 				m.showDead = !m.showDead
-				_ = saveConfig(config{Username: m.username, ShowDead: m.showDead})
+				_ = saveConfig(config{Username: m.username, ShowDead: m.showDead, UseGUIBrowser: m.useGUIBrowser, Cookie: m.cookie})
 				m.updateViewport()
 				return m, nil
 			}
+		case "b":
+			m.useGUIBrowser = !m.useGUIBrowser
+			_ = saveConfig(config{Username: m.username, ShowDead: m.showDead, UseGUIBrowser: m.useGUIBrowser, Cookie: m.cookie})
+			m.updateViewport()
+			return m, nil
 		case "?":
 			m.showHelp = true
 			return m, nil
 		case "w":
 			if m.state == stateList {
-				return m, openURL("https://news.ycombinator.com/login?goto=submit")
+				if m.username == "" {
+					m.loginActive = true
+					m.usernameInput.Focus()
+					m.usernameInput.SetValue("")
+					m.updateViewport()
+					return m, textinput.Blink
+				}
+				if m.cookie == "" {
+					m.writeStep = stepLoginPassword
+					m.passwordInput.Focus()
+					m.passwordInput.SetValue("")
+					m.updateViewport()
+					return m, textinput.Blink
+				}
+				m, cmd = m.startStoryEditor()
+				return m, cmd
 			}
 		case "r":
 			if m.state == stateDetail {
@@ -707,8 +1188,22 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if len(displayStories) == 0 {
 					return m, nil
 				}
-				curr := displayStories[m.cursor]
-				return m, openURL(fmt.Sprintf("https://news.ycombinator.com/login?goto=item%%3Fid%%3D%d", curr.ID))
+				if m.username == "" {
+					m.loginActive = true
+					m.usernameInput.Focus()
+					m.usernameInput.SetValue("")
+					m.updateViewport()
+					return m, textinput.Blink
+				}
+				if m.cookie == "" {
+					m.writeStep = stepLoginPassword
+					m.passwordInput.Focus()
+					m.passwordInput.SetValue("")
+					m.updateViewport()
+					return m, textinput.Blink
+				}
+				m, cmd = m.startCommentEditor()
+				return m, cmd
 			} else {
 				m.loading = true
 				m.cursor = 0
@@ -776,7 +1271,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if len(displayStories) > 0 {
 				story := displayStories[m.cursor]
 				if story.URL != "" {
-					return m, openURL(story.URL)
+					// ponytail: simple time-based debounce to prevent duplicate browser launches from key repeating.
+					if time.Since(m.lastBrowserOpen) < 1500*time.Millisecond {
+						return m, nil
+					}
+					m.lastBrowserOpen = time.Now()
+					return m, openURL(story.URL, m.useGUIBrowser)
 				}
 			}
 		case "esc", "backspace":
@@ -904,15 +1404,15 @@ func (m *model) updateViewport() {
 				}
 				itemStr = unselectedBoxStyle.Render(title + "\n" + metaText)
 			}
-			s.WriteString(itemStr + "\n")
+			s.WriteString(itemStr + "\n\n")
 		}
 		content = s.String()
 
 		// Scrolling-Logik für die Story-Liste:
-		// Jedes Item belegt genau 3 Zeilen im Viewport. Wir passen YOffset an,
-		// damit das aktuell ausgewählte Element immer sichtbar bleibt.
-		itemTop := m.cursor * 3
-		itemBottom := m.cursor * 3 + 2
+		// Jedes Item belegt genau 4 Zeilen im Viewport (Title, Meta, newline, newline).
+		// Wir passen YOffset an, damit das aktuell ausgewählte Element immer sichtbar bleibt.
+		itemTop := m.cursor * 4
+		itemBottom := m.cursor * 4 + 2
 		if itemTop < m.viewport.YOffset {
 			m.viewport.YOffset = itemTop
 		} else if itemBottom >= m.viewport.YOffset+m.viewport.Height {
@@ -1064,17 +1564,18 @@ func (m model) renderHelp() string {
 	table.WriteString(shortcut("1 - 6", "Direct Category Selection (6: Mine)") + "\n")
 	table.WriteString(shortcut("l", "Set HN Username / Login") + "\n")
 	table.WriteString(shortcut("h", "Toggle Show Dead/Flagged posts") + "\n")
+	table.WriteString(shortcut("b", "Toggle Browser Mode (GUI vs Terminal)") + "\n")
 	table.WriteString(shortcut("Enter", "Open Details & Comments") + "\n")
 	table.WriteString(shortcut("r", "Reload Feed") + "\n")
 	table.WriteString(shortcut("o", "Open Original Link") + "\n")
-	table.WriteString(shortcut("w", "Write Submission (Browser)") + "\n")
+	table.WriteString(shortcut("w", "Write Submission (TUI)") + "\n")
 
 	table.WriteString(section("Comments View") + "\n")
 	table.WriteString(shortcut("j / k / ↓ / ↑", "Scroll") + "\n")
 	table.WriteString(shortcut("Mouse Wheel", "Scroll") + "\n")
 	table.WriteString(shortcut("Esc / q", "Back to Story List") + "\n")
 	table.WriteString(shortcut("o", "Open Original Link") + "\n")
-	table.WriteString(shortcut("r", "Reply to Thread (Browser)") + "\n")
+	table.WriteString(shortcut("r", "Reply to Thread (TUI)") + "\n")
 
 	table.WriteString(section("General") + "\n")
 	table.WriteString(shortcut("?", "Close Help Menu") + "\n")
@@ -1173,7 +1674,26 @@ func (m model) View() string {
 	}
 
 	var footer string
-	if m.loginActive {
+	if m.submitting {
+		footer = footerStyle.Width(m.width).Render(
+			lipgloss.NewStyle().Foreground(orange).Bold(true).Render(" ⌛ Submitting... Please wait."),
+		)
+	} else if m.writeStep == stepLoginPassword {
+		promptLabel := " 🔑 HN Password: "
+		viewStr := m.passwordInput.View()
+		var helpView string
+		if m.wizardError != "" {
+			helpView = lipgloss.NewStyle().Foreground(lipgloss.Color("#FF0000")).Render("  ❌ Error: " + m.wizardError)
+		} else {
+			helpView = lipgloss.NewStyle().Foreground(lightGray).Render("  (Esc: Cancel / Enter: Log in)")
+		}
+		label := lipgloss.NewStyle().Foreground(white).Bold(true).Render(promptLabel)
+		footer = footerStyle.Width(m.width).Render(label + viewStr + helpView)
+	} else if m.wizardError != "" {
+		footer = footerStyle.Width(m.width).Render(
+			lipgloss.NewStyle().Foreground(lipgloss.Color("#FF0000")).Bold(true).Render(" ❌ Error: " + m.wizardError + " (Press any key to clear)"),
+		)
+	} else if m.loginActive {
 		loginLabel := lipgloss.NewStyle().Foreground(white).Bold(true).Render(" 👤 HN Username: ")
 		footer = footerStyle.Width(m.width).Render(
 			loginLabel + m.usernameInput.View() + lipgloss.NewStyle().Foreground(lightGray).Render("  (Esc: Cancel / Enter: Save)"),
@@ -1184,6 +1704,10 @@ func (m model) View() string {
 			searchLabel + m.searchInput.View() + lipgloss.NewStyle().Foreground(lightGray).Render("  (Esc: Cancel / Enter: Apply)"),
 		)
 	} else if m.state == stateList {
+		browserMode := "terminal"
+		if m.useGUIBrowser {
+			browserMode = "gui"
+		}
 		shortcuts := []string{
 			formatShortcut("q", "quit"),
 			formatShortcut("tab", "feed"),
@@ -1194,6 +1718,7 @@ func (m model) View() string {
 			formatShortcut("o", "link"),
 			formatShortcut("w", "post"),
 			formatShortcut("/", "search"),
+			formatShortcut("b", browserMode),
 			formatShortcut("?", "help"),
 		}
 		if m.searchInput.Value() != "" {
@@ -1201,11 +1726,16 @@ func (m model) View() string {
 		}
 		footer = footerStyle.Width(m.width).Render(strings.Join(shortcuts, " | "))
 	} else {
+		browserMode := "terminal"
+		if m.useGUIBrowser {
+			browserMode = "gui"
+		}
 		shortcuts := []string{
 			formatShortcut("esc/q", "back"),
 			formatShortcut("j/k", "scroll"),
 			formatShortcut("o", "link"),
 			formatShortcut("r", "reply"),
+			formatShortcut("b", browserMode),
 			formatShortcut("?", "help"),
 		}
 		footer = footerStyle.Width(m.width).Render(strings.Join(shortcuts, " | "))
