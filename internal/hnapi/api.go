@@ -71,18 +71,27 @@ type User struct {
 	Submitted []int  `json:"submitted"`
 }
 
-// GetUserSubmissions holt die IDs aller Einreichungen (Stories, Kommentare, etc.) eines Benutzers.
-func GetUserSubmissions(username string) ([]int, error) {
+// GetUser holt die Profildaten eines Benutzers.
+func GetUser(username string) (User, error) {
 	resp, err := httpClient.Get(fmt.Sprintf("%s/user/%s.json", BaseURL, username))
 	if err != nil {
-		return nil, err
+		return User{}, err
 	}
 	defer resp.Body.Close()
 
 	var u User
 	if err := json.NewDecoder(resp.Body).Decode(&u); err != nil {
-		return nil, err
+		return User{}, err
 	}
 
+	return u, nil
+}
+
+// GetUserSubmissions holt die IDs aller Einreichungen (Stories, Kommentare, etc.) eines Benutzers.
+func GetUserSubmissions(username string) ([]int, error) {
+	u, err := GetUser(username)
+	if err != nil {
+		return nil, err
+	}
 	return u.Submitted, nil
 }
