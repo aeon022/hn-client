@@ -208,6 +208,33 @@ import FooterSignature from '../components/FooterSignature.astro';
 					<h3 class="feature-card-title">Mouse-Wheel Support</h3>
 					<p class="feature-card-desc">No need to abandon the mouse. The terminal client supports seamless scrolling inside lists and comment threads using the mouse scroll-wheel.</p>
 				</div>
+
+				<!-- Card 7 -->
+				<div class="feature-card">
+					<div class="feature-icon">
+						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+					</div>
+					<h3 class="feature-card-title">Offline Bookmarks</h3>
+					<p class="feature-card-desc">Press <code>s</code> to download and save any story + comments locally to <code>~/.hn-bookmarks.json</code>. Read them offline under feed tab <code>7</code>.</p>
+				</div>
+
+				<!-- Card 8 -->
+				<div class="feature-card">
+					<div class="feature-icon">
+						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+					</div>
+					<h3 class="feature-card-title">Thread Link Extractor</h3>
+					<p class="feature-card-desc">Press <code>u</code> to scan comments and display all extracted links in a popup selection modal. Navigate with <code>j</code>/<code>k</code> and open with <code>Enter</code>.</p>
+				</div>
+
+				<!-- Card 9 -->
+				<div class="feature-card">
+					<div class="feature-icon">
+						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+					</div>
+					<h3 class="feature-card-title">HN Profiles & Alerts</h3>
+					<p class="feature-card-desc">Press <code>U</code> to view user profile summaries in a popover window. Background checking alerts you (🔔) instantly on new comment replies.</p>
+				</div>
 			</div>
 		</section>
 
@@ -328,15 +355,60 @@ import FooterSignature from '../components/FooterSignature.astro';
 						<span class="key-desc">Return to stories view, or close the client application</span>
 					</div>
 				</div>
+				<div class="key-item" data-group="actions">
+					<div class="key-caps">
+						<kbd>S</kbd> or <kbd>s</kbd>
+					</div>
+					<div class="key-info">
+						<span class="key-action">Offline Bookmark</span>
+						<span class="key-desc">Save story + comments offline to local bookmarks file</span>
+					</div>
+				</div>
+				<div class="key-item" data-group="actions">
+					<div class="key-caps">
+						<kbd>U</kbd>
+					</div>
+					<div class="key-info">
+						<span class="key-action">HN User Profile</span>
+						<span class="key-desc">Fetch and view user statistic profiles card in a popup</span>
+					</div>
+				</div>
+				<div class="key-item" data-group="actions">
+					<div class="key-caps">
+						<kbd>u</kbd>
+					</div>
+					<div class="key-info">
+						<span class="key-action">Comment Links</span>
+						<span class="key-desc">Extract all comment links into a popup list for selection</span>
+					</div>
+				</div>
+				<div class="key-item" data-group="actions">
+					<div class="key-caps">
+						<kbd>c</kbd>
+					</div>
+					<div class="key-info">
+						<span class="key-action">Fold Comment Thread</span>
+						<span class="key-desc">Collapse/expand the selected comment sub-thread</span>
+					</div>
+				</div>
+				<div class="key-item" data-group="actions">
+					<div class="key-caps">
+						<kbd>Ctrl</kbd> + <kbd>N</kbd>
+					</div>
+					<div class="key-info">
+						<span class="key-action">Clear Alerts</span>
+						<span class="key-desc">Reset the new replies notification badge in the header</span>
+					</div>
+				</div>
 
 				<!-- Category Direct Keys -->
 				<div class="key-item" data-group="categories">
 					<div class="key-caps">
-						<kbd>1</kbd> .. <kbd>5</kbd>
+						<kbd>1</kbd> .. <kbd>7</kbd>
 					</div>
 					<div class="key-info">
 						<span class="key-action">Direct Feed Selection</span>
-						<span class="key-desc">Jump straight to feeds (1:Top, 2:New, 3:Best, 4:Ask, 5:Show)</span>
+						<span class="key-desc">Jump straight to feeds (1:Top, 2:New, 3:Best, 4:Ask, 5:Show, 6:Mine, 7:Bookmarks)</span>
 					</div>
 				</div>
 			</div>
