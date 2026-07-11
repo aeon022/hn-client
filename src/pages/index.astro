@@ -1227,7 +1227,7 @@ go build -o hn-client main.go</code></pre>
 	.feature-card:hover {
 		border-color: var(--hn-orange);
 		transform: translateY(-4px);
-		box-shadow: 0 10px 30px rgba(255, 102, 0, 0.05);
+		box-shadow: 0 10px 30px rgba(255, 102, 0, 0.15), 0 0 15px rgba(255, 102, 0, 0.08);
 	}
 
 	.feature-card::before {
@@ -1302,6 +1302,13 @@ go build -o hn-client main.go</code></pre>
 		border: 1px solid var(--border-color);
 		border-radius: 12px;
 		overflow: hidden;
+		transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+	}
+
+	.install-card:hover {
+		border-color: var(--hn-orange);
+		box-shadow: 0 10px 30px rgba(255, 102, 0, 0.08), 0 0 15px rgba(255, 102, 0, 0.04);
+		transform: translateY(-2px);
 	}
 
 	.install-header {
@@ -1583,7 +1590,7 @@ go build -o hn-client main.go</code></pre>
 		height: 100%;
 		background: radial-gradient(
 			300px circle at var(--mouse-x, 0) var(--mouse-y, 0),
-			rgba(255, 102, 0, 0.04),
+			rgba(255, 102, 0, 0.12),
 			transparent 80%
 		);
 		opacity: 0;
@@ -1729,6 +1736,8 @@ go build -o hn-client main.go</code></pre>
 
 	.key-item:hover {
 		border-color: var(--hn-orange);
+		box-shadow: 0 5px 20px rgba(255, 102, 0, 0.1), 0 0 10px rgba(255, 102, 0, 0.05);
+		transform: translateY(-2px);
 	}
 
 	.key-item.hidden {
