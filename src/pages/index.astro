@@ -772,15 +772,32 @@ go build -o hn-client main.go</code></pre>
 		text-decoration: none;
 		font-size: 14px;
 		font-weight: 500;
-		transition: color 0.2s;
+		transition: all 0.2s ease-in-out;
 	}
 
 	.nav-link:hover {
 		color: var(--text-color);
+		text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
 	}
 
 	.nav-link.active {
 		color: var(--hn-orange);
+		text-shadow: 0 0 10px rgba(255, 102, 0, 0.6), 0 0 20px rgba(255, 102, 0, 0.2);
+	}
+
+	.nav-polar {
+		border: 1px solid rgba(255, 102, 0, 0.2);
+		border-radius: 99px;
+		padding: 4px 12px;
+		background: rgba(255, 102, 0, 0.05);
+		transition: all 0.2s ease-in-out !important;
+	}
+
+	.nav-polar:hover {
+		border-color: var(--hn-orange) !important;
+		background: rgba(255, 102, 0, 0.15) !important;
+		box-shadow: 0 0 15px rgba(255, 102, 0, 0.3) !important;
+		text-shadow: 0 0 8px rgba(255, 102, 0, 0.5) !important;
 	}
 
 	.nav-github {
@@ -795,12 +812,13 @@ go build -o hn-client main.go</code></pre>
 		padding: 8px 14px;
 		border-radius: 6px;
 		border: 1px solid rgba(255, 255, 255, 0.05);
-		transition: background-color 0.2s, border-color 0.2s;
+		transition: all 0.2s ease-in-out;
 	}
 
 	.nav-github:hover {
 		background: rgba(255, 255, 255, 0.05);
 		border-color: var(--hn-orange);
+		box-shadow: 0 0 15px rgba(255, 102, 0, 0.2);
 	}
 
 	/* Page Load Animation (Hero Section) */
