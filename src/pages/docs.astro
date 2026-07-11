@@ -1,0 +1,737 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout>
+	<div class="docs-wrapper">
+		<!-- Header -->
+		<header class="header">
+			<div class="container header-container">
+				<a href="/" class="logo">
+					<div class="logo-box">Y</div>
+					<span class="logo-text">hn-client <span class="cursor-blink">_</span></span>
+				</a>
+				<nav class="nav">
+					<a href="/" class="nav-link">Home</a>
+					<a href="/docs" class="nav-link active">Documentation</a>
+					<a href="https://github.com/aeon022/hn-client" target="_blank" rel="noopener" class="nav-github">
+						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+						<span>GitHub</span>
+					</a>
+				</nav>
+			</div>
+		</header>
+
+		<!-- Docs Container -->
+		<div class="container docs-container">
+			<!-- Sidebar -->
+			<aside class="docs-sidebar">
+				<ul class="sidebar-list">
+					<li><a href="#quickstart" class="sidebar-link active">Quickstart</a></li>
+					<li><a href="#installation" class="sidebar-link">Installation</a></li>
+					<li><a href="#configuration" class="sidebar-link">Configuration</a></li>
+					<li><a href="#keybindings" class="sidebar-link">Keybindings Reference</a></li>
+					<li><a href="#bookmarks" class="sidebar-link">Offline Bookmarks</a></li>
+					<li><a href="#link-extractor" class="sidebar-link">Link Extractor</a></li>
+					<li><a href="#user-profiles" class="sidebar-link">User Profiles</a></li>
+					<li><a href="#reply-alerts" class="sidebar-link">Reply Alerts (🔔)</a></li>
+					<li><a href="#external-editors" class="sidebar-link">Vim & External Browsers</a></li>
+					<li><a href="#cli-publisher" class="sidebar-link">CLI Markdown Publisher</a></li>
+				</ul>
+			</aside>
+
+			<!-- Content Area -->
+			<main class="docs-content">
+				<!-- Quickstart -->
+				<section id="quickstart" class="docs-section">
+					<h1 class="docs-title">Hacker News Terminal Client Documentation</h1>
+					<p class="lead">Welcome to the official, detailed documentation for <code>hn-client</code>. A blazing-fast, keyboard-driven Hacker News TUI (Terminal User Interface) built in Go using Bubble Tea.</p>
+					
+					<div class="alert-box info">
+						<div class="alert-icon">💡</div>
+						<div class="alert-body">
+							<strong>Prerequisites:</strong> <code>hn-client</code> works on macOS, Linux, and Windows terminal environments. Having a terminal browser (like <code>w3m</code> or <code>lynx</code>) installed is optional but highly recommended for the best experience.
+						</div>
+					</div>
+				</section>
+
+				<!-- Installation -->
+				<section id="installation" class="docs-section">
+					<h2 class="section-title">Installation & Compilation</h2>
+					<p>You can compile and install <code>hn-client</code> directly from source using the Go toolchain.</p>
+
+					<h3>1. Install Go</h3>
+					<p>Ensure you have Go version 1.21 or higher installed on your machine. Check with:</p>
+					<pre class="code-block"><code>go version</code></pre>
+
+					<h3>2. Clone and Compile</h3>
+					<p>Clone the repository and run the build command:</p>
+					<pre class="code-block"><code>git clone https://github.com/aeon022/hn-client.git
+cd hn-client
+go build -o hn-client main.go</code></pre>
+
+					<h3>3. Automated Setup Script</h3>
+					<p>For convenience, you can execute the setup script which builds the binary and links it to your local path:</p>
+					<pre class="code-block"><code>chmod +x setup.sh
+./setup.sh</code></pre>
+				</section>
+
+				<!-- Configuration -->
+				<section id="configuration" class="docs-section">
+					<h2 class="section-title">Configuration File</h2>
+					<p>When you start the application for the first time, a configuration file is automatically created in your home directory at <code>~/.hn-config.json</code>.</p>
+					
+					<p>Here is an example of the structure of this file:</p>
+					<pre class="code-block"><code class="json">{
+  "username": "hacker_user",
+  "show_dead": false,
+  "use_gui_browser": false,
+  "cookie": "user_auth_cookie_string",
+  "theme": "dracula"
+}</code></pre>
+
+					<h3>Configurable Fields:</h3>
+					<ul>
+						<li><strong><code>username</code>:</strong> Your Hacker News handle, used to check for reply notifications.</li>
+						<li><strong><code>show_dead</code>:</strong> Boolean to show/hide dead or flagged stories.</li>
+						<li><strong><code>use_gui_browser</code>:</strong> If <code>true</code>, links will bypass terminal browsers and open in your system's GUI browser (Safari, Chrome, Firefox).</li>
+						<li><strong><code>cookie</code>:</strong> Saved HN session cookie. Used for submitting stories and replies directly inside the TUI.</li>
+						<li><strong><code>theme</code>:</strong> Selected styling layout (<code>orange</code>, <code>dracula</code>, <code>nord</code>, <code>monokai</code>).</li>
+					</ul>
+				</section>
+
+				<!-- Keybindings -->
+				<section id="keybindings" class="docs-section">
+					<h2 class="section-title">Keybindings Reference</h2>
+					<p>The TUI is separated into two main views: the **List View** (stories) and the **Detail View** (story description + comment tree).</p>
+
+					<h3>1. Navigation & General Keys (Available in all views)</h3>
+					<table class="docs-table">
+						<thead>
+							<tr>
+								<th>Key</th>
+								<th>Action</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td><kbd>?</kbd></td>
+								<td>Help Menu</td>
+								<td>Toggle the overlay help screen mapping all keys.</td>
+							</tr>
+							<tr>
+								<td><kbd>t</kbd></td>
+								<td>Theme Toggle</td>
+								<td>Cycle active color palette (Dracula, Nord, Monokai, Orange).</td>
+							</tr>
+							<tr>
+								<td><kbd>b</kbd></td>
+								<td>Browser Toggle</td>
+								<td>Switch between GUI and Terminal browser modes.</td>
+							</tr>
+							<tr>
+								<td><kbd>Ctrl+C</kbd></td>
+								<td>Quit</td>
+								<td>Safely close the application.</td>
+							</tr>
+						</tbody>
+					</table>
+
+					<h3>2. Story List View Keys</h3>
+					<table class="docs-table">
+						<thead>
+							<tr>
+								<th>Key</th>
+								<th>Action</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td><kbd>j</kbd> / <kbd>k</kbd></td>
+								<td>Navigation</td>
+								<td>Move the cursor up and down through the stories feed list.</td>
+							</tr>
+							<tr>
+								<td><kbd>Tab</kbd> / <kbd>Shift+Tab</kbd></td>
+								<td>Next / Prev Feed</td>
+								<td>Cycle through feeds (Top, New, Best, Ask, Show, Mine, Bookmarks).</td>
+							</tr>
+							<tr>
+								<td><kbd>1</kbd> - <kbd>7</kbd></td>
+								<td>Direct Feed Select</td>
+								<td>Jump directly to feed: 1:Top, 2:New, 3:Best, 4:Ask, 5:Show, 6:Mine, 7:Bookmarks.</td>
+							</tr>
+							<tr>
+								<td><kbd>n</kbd> / <kbd>p</kbd></td>
+								<td>Page Navigation</td>
+								<td>Fetch the Next (<code>n</code>) or Previous (<code>p</code>) page of 30 stories.</td>
+							</tr>
+							<tr>
+								<td><kbd>/</kbd></td>
+								<td>Filter search</td>
+								<td>Filter stories instantly by typing title or author queries.</td>
+							</tr>
+							<tr>
+								<td><kbd>x</kbd></td>
+								<td>Clear search</td>
+								<td>Clear the active search filter query.</td>
+							</tr>
+							<tr>
+								<td><kbd>Enter</kbd></td>
+								<td>Open Details</td>
+								<td>Open comments tree and full article content.</td>
+							</tr>
+							<tr>
+								<td><kbd>o</kbd></td>
+								<td>Open Original Link</td>
+								<td>Open the external URL of the story in the selected browser.</td>
+							</tr>
+							<tr>
+								<td><kbd>s</kbd></td>
+								<td>Offline Bookmark</td>
+								<td>Download and save the selected story + all comments offline.</td>
+							</tr>
+							<tr>
+								<td><kbd>U</kbd></td>
+								<td>User Profile</td>
+								<td>Show the author's Hacker News profile info card in a popup.</td>
+							</tr>
+							<tr>
+								<td><kbd>w</kbd></td>
+								<td>Write Submission</td>
+								<td>Create a new post on HN using the external text editor.</td>
+							</tr>
+						</tbody>
+					</table>
+
+					<h3>3. Detail / Comments View Keys</h3>
+					<table class="docs-table">
+						<thead>
+							<tr>
+								<th>Key</th>
+								<th>Action</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td><kbd>j</kbd> / <kbd>k</kbd></td>
+								<td>Comment Cursor</td>
+								<td>Navigate through the comment tree (selected comment gets double border).</td>
+							</tr>
+							<tr>
+								<td><kbd>Esc</kbd> / <kbd>q</kbd></td>
+								<td>Back</td>
+								<td>Return to the Story List feed view.</td>
+							</tr>
+							<tr>
+								<td><kbd>c</kbd></td>
+								<td>Fold / Collapse</td>
+								<td>Toggle collapse of the selected comment thread and all its replies.</td>
+							</tr>
+							<tr>
+								<td><kbd>u</kbd></td>
+								<td>Extract Links</td>
+								<td>Extract all URLs from text and comments into a popup selection menu.</td>
+							</tr>
+							<tr>
+								<td><kbd>r</kbd></td>
+								<td>Quick Reply</td>
+								<td>Write and submit a reply in the footer textinput.</td>
+							</tr>
+							<tr>
+								<td><kbd>e</kbd></td>
+								<td>Vim Reply</td>
+								<td>Write a formatted reply using external editor (e.g. Vim).</td>
+							</tr>
+							<tr>
+								<td><kbd>s</kbd></td>
+								<td>Offline Bookmark</td>
+								<td>Save story and current comments tree offline.</td>
+							</tr>
+							<tr>
+								<td><kbd>U</kbd></td>
+								<td>User Profile</td>
+								<td>View the selected comment author's profile card.</td>
+							</tr>
+						</tbody>
+					</table>
+				</section>
+
+				<!-- Bookmarks -->
+				<section id="bookmarks" class="docs-section">
+					<h2 class="section-title">Offline Bookmarks System</h2>
+					<p>The bookmarks system allows you to store stories and their complete comments tree locally for reading on planes, trains, or offline commutes.</p>
+
+					<div class="alert-box warning">
+						<div class="alert-icon">⚠️</div>
+						<div class="alert-body">
+							<strong>Warning:</strong> Bookmarks are saved locally to <code>~/.hn-bookmarks.json</code>. Do not edit this file manually unless you are familiar with JSON syntax, as it may cause loading failures.
+						</div>
+					</div>
+
+					<h3>How to Bookmark:</h3>
+					<ol>
+						<li>From the **Story List**, hover over any story and press <kbd>s</kbd>. The client will fetch the comments tree in the background and save it.</li>
+						<li>Or, inside the **Detail View**, press <kbd>s</kbd> to save the currently loaded story and comments instantly.</li>
+					</ol>
+
+					<h3>Reading Bookmarks:</h3>
+					<p>Press <kbd>7</kbd> or cycle feeds to the <strong>Bookmarks</strong> tab. You will see a list of your saved stories sorted by the time they were saved. Pressing <code>Enter</code> opens the comments offline.</p>
+				</section>
+
+				<!-- Link Extractor -->
+				<section id="link-extractor" class="docs-section">
+					<h2 class="section-title">Comment Link Extractor</h2>
+					<p>Copypasting URLs out of terminal emulators is often painful. The link extractor solves this completely.</p>
+					
+					<h3>Usage:</h3>
+					<ol>
+						<li>Inside any story **Detail View**, press <kbd>u</kbd>.</li>
+						<li>The TUI will scan the main article text and all comments, extracting any strings matching <code>http://</code> or <code>https://</code>.</li>
+						<li>An overlay modal will display all extracted links.</li>
+						<li>Use <kbd>j</kbd>/<kbd>k</kbd> to select a link, and press <kbd>Enter</kbd> to open it in your browser.</li>
+						<li>Press <kbd>Esc</kbd> or <kbd>u</kbd> to close the overlay.</li>
+					</ol>
+				</section>
+
+				<!-- User Profiles -->
+				<section id="user-profiles" class="docs-section">
+					<h2 class="section-title">User Profiles Popovers</h2>
+					<p>Quickly look up metadata about Hacker News authors without leaving the terminal view.</p>
+					
+					<h3>Usage:</h3>
+					<ul>
+						<li>Press <kbd>U</kbd> (Shift + U) over a selected story or comment.</li>
+						<li>The client will fetch the profile information for the item's author from the HN API.</li>
+						<li>A popover box displays the **Username**, **Registration Date**, **Karma Score**, and the **About bio** text.</li>
+						<li>The bio description is automatically stripped of HTML tags and word-wrapped to fit the overlay container.</li>
+					</ul>
+				</section>
+
+				<!-- Reply Alerts -->
+				<section id="reply-alerts" class="docs-section">
+					<h2 class="section-title">New Reply Notifications (🔔)</h2>
+					<p>Stay updated on conversations. If you enter your Hacker News username, <code>hn-client</code> will monitor your recent submissions for replies.</p>
+					
+					<h3>How it works:</h3>
+					<ol>
+						<li>Configure your username by pressing <kbd>l</kbd> and typing your HN handle.</li>
+						<li>At startup and every 60 seconds, a background routine pulls your latest 10 submissions/comments.</li>
+						<li>It checks if those items received new child comments.</li>
+						<li>If new replies are found, a bell notification is shown in the top header: <code>🔔 (X new, Ctrl+N to clear)</code>.</li>
+						<li>Press <kbd>Ctrl+N</kbd> to mark all replies as seen, saving them to your local cache at <code>~/.hn-seen-replies.json</code>.</li>
+					</ol>
+				</section>
+
+				<!-- External Editors -->
+				<section id="external-editors" class="docs-section">
+					<h2 class="section-title">Vim and Terminal Browser Integration</h2>
+					<p>Writing long responses inside terminal inputs can be restrictive. <code>hn-client</code> offers full external editor support.</p>
+					
+					<h3>1. Quick Replies vs. External Vim Replies:</h3>
+					<ul>
+						<li><strong>Quick Reply (<kbd>r</kbd>):</strong> Opens a simple text input in the TUI footer. Great for short, one-line responses.</li>
+						<li><strong>External Reply (<kbd>e</kbd>):</strong> Suspends the Bubble Tea TUI session and spawns your system's default text editor (usually <code>Vim</code> or <code>Neovim</code>, configured via your <code>$EDITOR</code> environment variable) with a temporary Markdown file.</li>
+					</ul>
+
+					<h3>2. Creating Submissions (<kbd>w</kbd>):</h3>
+					<p>Pressing <kbd>w</kbd> in list view spawns a template containing YAML frontmatter:</p>
+					<pre class="code-block"><code class="yaml">---
+Title: Show HN: My Awesome Go Project
+URL: https://github.com/my/project
+---
+Optional text body here...</code></pre>
+					<p>Write your title, link, and text, save and quit. The TUI will resume, read the file, and submit it to Hacker News.</p>
+				</section>
+
+				<!-- CLI Publisher -->
+				<section id="cli-publisher" class="docs-section">
+					<h2 class="section-title">CLI Markdown Publisher</h2>
+					<p>In addition to the interactive TUI, <code>hn-client</code> can be executed directly from the CLI to publish drafts or posts saved in Markdown files.</p>
+
+					<h3>Usage:</h3>
+					<pre class="code-block"><code>hn-client publish post_draft.md</code></pre>
+					
+					<p>The Markdown file must contain standard YAML frontmatter defining the <code>Title</code> and either a <code>URL</code> (for links) or a text body:</p>
+					<pre class="code-block"><code class="markdown">---
+Title: Show HN: A fast terminal client in Go
+URL: https://github.com/gweiher/hn-client
+---
+This client is built with Bubble Tea...</code></pre>
+				</section>
+			</main>
+		</div>
+	</div>
+</Layout>
+
+<style>
+	/* Docs Page Styling */
+	.docs-wrapper {
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.docs-container {
+		display: grid;
+		grid-template-columns: 240px 1fr;
+		gap: 40px;
+		margin-top: 40px;
+		margin-bottom: 80px;
+		flex: 1;
+	}
+
+	/* Sidebar styling */
+	.docs-sidebar {
+		position: sticky;
+		top: 110px;
+		height: calc(100vh - 150px);
+		overflow-y: auto;
+	}
+
+	.sidebar-list {
+		list-style: none;
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	.sidebar-link {
+		color: var(--text-muted);
+		text-decoration: none;
+		font-size: 15px;
+		font-weight: 500;
+		transition: color 0.2s, padding-left 0.2s;
+		display: block;
+		border-left: 2px solid transparent;
+		padding-left: 12px;
+	}
+
+	.sidebar-link:hover {
+		color: var(--text-color);
+		padding-left: 16px;
+	}
+
+	.sidebar-link.active {
+		color: var(--hn-orange);
+		border-left-color: var(--hn-orange);
+		font-weight: 600;
+	}
+
+	/* Content Area styling */
+	.docs-content {
+		max-width: 800px;
+	}
+
+	.docs-section {
+		margin-bottom: 60px;
+		scroll-margin-top: 110px;
+	}
+
+	.docs-title {
+		font-family: 'Outfit', sans-serif;
+		font-size: 38px;
+		font-weight: 800;
+		letter-spacing: -1px;
+		color: var(--text-color);
+		margin-bottom: 20px;
+	}
+
+	.lead {
+		font-size: 18px;
+		color: var(--text-muted);
+		line-height: 1.6;
+		margin-bottom: 30px;
+	}
+
+	.section-title {
+		font-family: 'Outfit', sans-serif;
+		font-size: 28px;
+		font-weight: 700;
+		letter-spacing: -0.5px;
+		color: var(--text-color);
+		margin-bottom: 20px;
+		padding-bottom: 10px;
+		border-bottom: 1px solid var(--border-color);
+	}
+
+	.docs-section p {
+		font-size: 16px;
+		line-height: 1.65;
+		color: var(--text-muted);
+		margin-bottom: 20px;
+	}
+
+	.docs-section h3 {
+		font-family: 'Outfit', sans-serif;
+		font-size: 18px;
+		font-weight: 600;
+		margin-top: 30px;
+		margin-bottom: 12px;
+		color: var(--text-color);
+	}
+
+	.docs-section ul, .docs-section ol {
+		margin-left: 20px;
+		margin-bottom: 20px;
+		color: var(--text-muted);
+	}
+
+	.docs-section li {
+		margin-bottom: 8px;
+		line-height: 1.5;
+	}
+
+	.docs-section code {
+		background: rgba(255, 255, 255, 0.06);
+		padding: 2px 6px;
+		border-radius: 4px;
+		font-family: 'Fira Code', monospace;
+		font-size: 14px;
+		color: var(--cyan);
+	}
+
+	.code-block {
+		background: #0b0c13;
+		border: 1px solid var(--border-color);
+		border-radius: 8px;
+		padding: 16px;
+		overflow-x: auto;
+		margin-bottom: 25px;
+	}
+
+	.code-block code {
+		background: transparent;
+		padding: 0;
+		color: var(--text-color);
+		font-size: 14px;
+	}
+
+	.code-block code.json {
+		color: var(--blue);
+	}
+
+	.code-block code.yaml {
+		color: var(--green);
+	}
+
+	/* Alert boxes */
+	.alert-box {
+		display: flex;
+		gap: 15px;
+		background: rgba(255, 255, 255, 0.03);
+		border: 1px solid var(--border-color);
+		border-radius: 8px;
+		padding: 16px;
+		margin-bottom: 30px;
+	}
+
+	.alert-box.info {
+		border-left: 4px solid var(--cyan);
+	}
+
+	.alert-box.warning {
+		border-left: 4px solid var(--hn-orange);
+	}
+
+	.alert-icon {
+		font-size: 20px;
+	}
+
+	.alert-body {
+		font-size: 15px;
+		line-height: 1.5;
+		color: var(--text-muted);
+	}
+
+	.alert-body strong {
+		color: var(--text-color);
+	}
+
+	/* Keybindings Table */
+	.docs-table {
+		width: 100%;
+		border-collapse: collapse;
+		margin-bottom: 35px;
+		text-align: left;
+	}
+
+	.docs-table th, .docs-table td {
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--border-color);
+		font-size: 15px;
+	}
+
+	.docs-table th {
+		font-weight: 600;
+		color: var(--text-color);
+		background: rgba(255, 255, 255, 0.02);
+	}
+
+	.docs-table td {
+		color: var(--text-muted);
+	}
+
+	.docs-table td kbd {
+		background: rgba(255, 255, 255, 0.1);
+		border: 1px solid var(--border-color);
+		border-radius: 4px;
+		padding: 2px 6px;
+		font-family: inherit;
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--text-color);
+		box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
+	}
+
+	/* Header override styles */
+	.header {
+		position: sticky;
+		top: 0;
+		z-index: 100;
+		background: rgba(5, 5, 8, 0.7);
+		backdrop-filter: blur(12px);
+		border-bottom: 1px solid var(--border-color);
+	}
+
+	.header-container {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		height: 70px;
+	}
+
+	.logo {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		text-decoration: none;
+		font-family: 'Outfit', sans-serif;
+	}
+
+	.logo-box {
+		background: var(--hn-orange);
+		color: white;
+		font-weight: 800;
+		font-size: 14px;
+		padding: 3px 6px;
+		border-radius: 4px;
+	}
+
+	.logo-text {
+		color: var(--text-color);
+		font-weight: 700;
+		font-size: 18px;
+		letter-spacing: -0.5px;
+	}
+
+	.cursor-blink {
+		color: var(--hn-orange);
+		animation: blink 1s step-end infinite;
+	}
+
+	@keyframes blink {
+		from, to { opacity: 1; }
+		50% { opacity: 0; }
+	}
+
+	.nav {
+		display: flex;
+		align-items: center;
+		gap: 25px;
+	}
+
+	.nav-link {
+		color: var(--text-muted);
+		text-decoration: none;
+		font-size: 14px;
+		font-weight: 500;
+		transition: color 0.2s;
+	}
+
+	.nav-link:hover, .nav-link.active {
+		color: var(--text-color);
+	}
+
+	.nav-link.active {
+		color: var(--hn-orange);
+	}
+
+	.nav-github {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		background: var(--border-color);
+		border: 1px solid transparent;
+		color: var(--text-color);
+		text-decoration: none;
+		padding: 8px 14px;
+		border-radius: 6px;
+		font-size: 14px;
+		font-weight: 500;
+		transition: background-color 0.2s, border-color 0.2s;
+	}
+
+	.nav-github:hover {
+		background: rgba(255, 255, 255, 0.05);
+		border-color: rgba(255, 255, 255, 0.1);
+	}
+
+	/* Responsive tweaks */
+	@media (max-width: 768px) {
+		.docs-container {
+			grid-template-columns: 1fr;
+		}
+
+		.docs-sidebar {
+			position: static;
+			height: auto;
+			border-bottom: 1px solid var(--border-color);
+			padding-bottom: 20px;
+		}
+
+		.sidebar-list {
+			flex-direction: row;
+			flex-wrap: wrap;
+			gap: 8px;
+		}
+
+		.sidebar-link {
+			border-left: none;
+			border-bottom: 2px solid transparent;
+			padding-left: 0;
+			padding-bottom: 4px;
+		}
+
+		.sidebar-link.active {
+			border-bottom-color: var(--hn-orange);
+		}
+	}
+</style>
+
+<script>
+	// Scrollspy effect for active sidebar links
+	const sections = document.querySelectorAll('.docs-section');
+	const sidebarLinks = document.querySelectorAll('.sidebar-link');
+
+	window.addEventListener('scroll', () => {
+		let current = '';
+		sections.forEach(section => {
+			const sectionTop = section.offsetTop;
+			const sectionHeight = section.clientHeight;
+			if (pageYOffset >= (sectionTop - 150)) {
+				current = section.getAttribute('id');
+			}
+		});
+
+		sidebarLinks.forEach(link => {
+			link.classList.remove('active');
+			if (link.getAttribute('href') === `#${current}`) {
+				link.classList.add('active');
+			}
+		});
+	});
+</script>
