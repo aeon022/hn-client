@@ -31,6 +31,13 @@ import FooterSignature from '../components/FooterSignature.astro';
 				<span class="logo-box">HN</span>
 				<span class="logo-text">hn-client<span class="cursor-blink">_</span></span>
 			</a>
+			
+			<button class="menu-toggle" id="mobile-menu-toggle" aria-label="Toggle navigation Menu">
+				<span></span>
+				<span></span>
+				<span></span>
+			</button>
+
 			<nav class="nav">
 				<a href="#features" class="nav-link">Features</a>
 				<a href="#terminal-demo" class="nav-link">Live Demo</a>
@@ -771,6 +778,10 @@ go build -o hn-client main.go</code></pre>
 	@keyframes blink {
 		from, to { opacity: 1; }
 		50% { opacity: 0; }
+	}
+
+	.menu-toggle {
+		display: none;
 	}
 
 	.nav {
@@ -1524,16 +1535,67 @@ go build -o hn-client main.go</code></pre>
 			font-size: 16px;
 		}
 		.header-container {
-			flex-direction: column;
-			height: auto;
-			padding: 15px 20px;
-			gap: 15px;
-		}
-		.nav {
+			flex-direction: row;
+			height: 60px;
+			padding: 0 20px;
+			justify-content: space-between;
 			width: 100%;
-			justify-content: center;
-			flex-wrap: wrap;
-			gap: 15px;
+		}
+
+		.menu-toggle {
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			width: 22px;
+			height: 16px;
+			background: transparent;
+			border: none;
+			cursor: pointer;
+			padding: 0;
+			z-index: 110;
+		}
+		.menu-toggle span {
+			width: 100%;
+			height: 2px;
+			background-color: var(--text-color);
+			border-radius: 2px;
+			transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+		}
+		.menu-toggle.active span:nth-child(1) {
+			transform: translateY(7px) rotate(45deg);
+		}
+		.menu-toggle.active span:nth-child(2) {
+			opacity: 0;
+		}
+		.menu-toggle.active span:nth-child(3) {
+			transform: translateY(-7px) rotate(-45deg);
+		}
+
+		.nav {
+			display: none;
+			position: absolute;
+			top: 75px;
+			left: 10px;
+			width: calc(100% - 20px);
+			background: rgba(11, 12, 19, 0.96);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(255, 255, 255, 0.08);
+			border-radius: 20px;
+			padding: 25px;
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 20px;
+			box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+			z-index: 105;
+		}
+		.nav.active {
+			display: flex;
+			animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+		}
+
+		@keyframes slideDown {
+			from { opacity: 0; transform: translateY(-10px); }
+			to { opacity: 1; transform: translateY(0); }
 		}
 		.section-title {
 			font-size: 30px;
@@ -3522,4 +3584,20 @@ func openURL(url string) tea.Cmd {
 		}, { threshold: 0.3 });
 		autoplayObserver.observe(terminalSection);
 	}
+
+	// Mobile Menu Toggling
+	const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+	const navMenu = document.querySelector('.nav');
+
+	mobileMenuToggle?.addEventListener('click', () => {
+		mobileMenuToggle.classList.toggle('active');
+		navMenu?.classList.toggle('active');
+	});
+
+	document.querySelectorAll('.nav .nav-link, .nav .nav-github').forEach(link => {
+		link.addEventListener('click', () => {
+			mobileMenuToggle?.classList.remove('active');
+			navMenu?.classList.remove('active');
+		});
+	});
 </script>
