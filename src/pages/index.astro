@@ -1533,8 +1533,21 @@ go build -o hn-client main.go</code></pre>
 		padding-right: 20px;
 	}
 
+	/* Fluid Spacing for desktop navigation menu on medium viewports */
+	@media (min-width: 1101px) and (max-width: 1280px) {
+		.nav {
+			gap: 15px !important;
+		}
+		.nav-link {
+			font-size: 13px !important;
+		}
+		.logo-text {
+			font-size: 16px !important;
+		}
+	}
+
 	/* Responsive design */
-	@media (max-width: 1024px) {
+	@media (max-width: 1100px) {
 		.logo-text {
 			font-size: 15px !important;
 		}
