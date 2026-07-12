@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+    <defs>
+        <!-- Neon Glow Filter -->
+        <filter id="neon-glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="12" result="blur" />
+            <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+            </feMerge>
+        </filter>
+        <!-- Border Glow Filter -->
+        <filter id="border-glow" x="-10%" y="-10%" width="120%" height="120%">
+            <feGaussianBlur stdDeviation="8" result="blur" />
+            <feComponentTransfer in="blur" result="glow">
+                <feFuncA type="linear" slope="0.5"/>
+            </feComponentTransfer>
+            <feMerge>
+                <feMergeNode in="glow" />
+                <feMergeNode in="SourceGraphic" />
+            </feMerge>
+        </filter>
+        <!-- Gradients -->
+        <linearGradient id="bg-grad" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#0e1017" />
+            <stop offset="50%" stop-color="#07080c" />
+            <stop offset="100%" stop-color="#020305" />
+        </linearGradient>
+        <linearGradient id="border-grad" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#ff6600" />
+            <stop offset="30%" stop-color="#ff8c3a" />
+            <stop offset="70%" stop-color="#00f0ff" />
+            <stop offset="100%" stop-color="#adff2f" />
+        </linearGradient>
+        <linearGradient id="logo-grad" x1="128" y1="128" x2="384" y2="384" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#ff8c3a" />
+            <stop offset="100%" stop-color="#ff6600" />
+        </linearGradient>
+    </defs>
+
+    <!-- App Icon Base Background -->
+    <rect width="512" height="512" rx="112" fill="url(#bg-grad)" />
+    
+    <!-- Outer Glow Border -->
+    <rect x="4" y="4" width="504" height="504" rx="108" stroke="url(#border-grad)" stroke-width="4.5" opacity="0.8" filter="url(#border-glow)" />
+
+    <!-- Terminal grid lines background (very subtle) -->
+    <path d="M 0,64 L 512,64 M 0,128 L 512,128 M 0,192 L 512,192 M 0,256 L 512,256 M 0,320 L 512,320 M 0,384 L 512,384 M 0,448 L 512,448" stroke="#ffffff" stroke-width="1.5" opacity="0.02" />
+    <path d="M 64,0 L 64,512 M 128,0 L 128,512 M 192,0 L 192,512 M 256,0 L 256,512 M 320,0 L 320,512 M 384,0 L 384,512 M 448,0 L 448,512" stroke="#ffffff" stroke-width="1.5" opacity="0.02" />
+
+    <!-- Sleek Orange Logo Badge with 3D feel -->
+    <rect x="128" y="128" width="256" height="256" rx="48" fill="url(#logo-grad)" filter="url(#neon-glow)" />
+    <!-- Highlights for glass effect -->
+    <rect x="132" y="132" width="248" height="248" rx="44" stroke="#ffffff" stroke-width="2" opacity="0.15" />
+    <path d="M 140,140 Q 256,120 372,140" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity="0.25" />
+
+    <!-- Terminal prompt symbol inside the orange box -->
+    <g transform="translate(160, 185)" stroke="#ffffff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Chevron ">" -->
+        <path d="M 12,25 L 36,45 L 12,65" />
+        <!-- Letter "H" -->
+        <path d="M 65,22 L 65,68 M 95,22 L 95,68 M 65,45 L 95,45" />
+        <!-- Letter "N" -->
+        <path d="M 125,68 L 125,22 L 155,68 L 155,22" />
+    </g>
+    <!-- Blinking cursor "_" -->
+    <rect x="332" y="243" width="16" height="10" fill="#ffffff" opacity="0.9" />
+</svg>
