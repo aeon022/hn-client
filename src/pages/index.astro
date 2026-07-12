@@ -95,6 +95,16 @@ import FooterSignature from '../components/FooterSignature.astro';
 			<div class="section-header">
 				<h2 class="section-title">Try the TUI in your browser</h2>
 				<p class="section-desc">Click on the categories inside the simulator to switch Hacker News feeds in real time.</p>
+				
+				<div class="theme-selector-container">
+					<span class="theme-label">🎨 Live TUI Theme Preview:</span>
+					<div class="theme-buttons">
+						<button class="theme-btn active" data-tui-theme="orange">Orange (Classic)</button>
+						<button class="theme-btn" data-tui-theme="dracula">Dracula</button>
+						<button class="theme-btn" data-tui-theme="nord">Nord</button>
+						<button class="theme-btn" data-tui-theme="monokai">Monokai</button>
+					</div>
+				</div>
 			</div>
 
 			<div class="terminal-window" tabindex="0" id="tui-window" title="Click to use keyboard shortcuts (j/k/Enter/Tab/1-5/q)">
@@ -586,6 +596,8 @@ func main() &#123;
 			<div class="section-header">
 				<h2 class="section-title">Quickstart & Installation</h2>
 				<p class="section-desc">The only requirement is a working Go toolchain (Version 1.21 or higher) installed on your system.</p>
+				
+				<div id="os-detection-badge" class="os-badge">💻 Detecting your operating system...</div>
 			</div>
 
 			<div class="installation-tabs-container reveal reveal-stagger">
@@ -1049,13 +1061,53 @@ go build -o hn-client main.go</code></pre>
 	}
 
 	.terminal-window {
-		background: #08090f;
+		background: var(--tui-bg, #08090f);
 		border: 1px solid var(--border-color);
 		border-radius: 12px;
 		box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 102, 0, 0.03);
 		overflow: hidden;
 		max-width: 900px;
 		margin: 0 auto;
+		transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+		/* Theme variables - Orange (Default) */
+		--tui-primary: #FF6600;
+		--tui-text: #FFFFFF;
+		--tui-bg: #0b0c13;
+		--tui-muted: #828282;
+		--tui-cyan: #00F0FF;
+		--tui-blue: #85A5FF;
+		--tui-green: #ADFF2F;
+	}
+
+	.terminal-window.theme-dracula {
+		--tui-primary: #BD93F9;
+		--tui-text: #F8F8F2;
+		--tui-bg: #282A36;
+		--tui-muted: #6272A4;
+		--tui-cyan: #8BE9FD;
+		--tui-blue: #FF79C6;
+		--tui-green: #50FA7B;
+	}
+
+	.terminal-window.theme-nord {
+		--tui-primary: #88C0D0;
+		--tui-text: #ECEFF4;
+		--tui-bg: #2E3440;
+		--tui-muted: #4C566A;
+		--tui-cyan: #8FBCBB;
+		--tui-blue: #81A1C1;
+		--tui-green: #A3BE8C;
+	}
+
+	.terminal-window.theme-monokai {
+		--tui-primary: #F92672;
+		--tui-text: #F8F8F2;
+		--tui-bg: #272822;
+		--tui-muted: #75715E;
+		--tui-cyan: #66D9EF;
+		--tui-blue: #AE81FF;
+		--tui-green: #A6E22E;
 	}
 
 	.terminal-bar {
@@ -1098,7 +1150,9 @@ go build -o hn-client main.go</code></pre>
 		font-family: 'Fira Code', 'Courier New', monospace;
 		font-size: 14px;
 		line-height: 1.5;
-		color: #e2e8f0;
+		background: var(--tui-bg, #0b0c13);
+		color: var(--tui-text, #e2e8f0);
+		transition: background 0.3s, color 0.3s;
 	}
 
 	.tui-header {
@@ -1109,10 +1163,11 @@ go build -o hn-client main.go</code></pre>
 	}
 
 	.tui-app-title {
-		background-color: var(--hn-orange);
+		background-color: var(--tui-primary, var(--hn-orange));
 		color: white;
 		font-weight: bold;
 		padding: 2px 8px;
+		transition: background-color 0.3s;
 	}
 
 	.tui-tabs {
@@ -1123,7 +1178,7 @@ go build -o hn-client main.go</code></pre>
 	.tui-tab {
 		background: none;
 		border: none;
-		color: var(--gray);
+		color: var(--tui-muted, var(--gray));
 		font-family: inherit;
 		font-size: 13px;
 		cursor: pointer;
@@ -1132,9 +1187,10 @@ go build -o hn-client main.go</code></pre>
 	}
 
 	.tui-tab.active {
-		background-color: var(--hn-orange);
+		background-color: var(--tui-primary, var(--hn-orange));
 		color: white;
 		font-weight: bold;
+		transition: background-color 0.3s;
 	}
 
 	.tui-tab:not(.active):hover {
@@ -1159,7 +1215,7 @@ go build -o hn-client main.go</code></pre>
 	}
 
 	.tui-item.selected {
-		border-left-color: var(--hn-orange);
+		border-left-color: var(--tui-primary, var(--hn-orange));
 	}
 
 	.tui-item-body {
@@ -1173,33 +1229,95 @@ go build -o hn-client main.go</code></pre>
 	}
 
 	.tui-item.selected .tui-item-title {
-		color: var(--hn-orange);
+		color: var(--tui-primary, var(--hn-orange));
 	}
 
 	.tui-item-meta {
 		font-size: 12px;
 	}
 
-	.meta-pts { color: var(--cyan); }
-	.meta-author { color: var(--hn-orange); }
-	.meta-comments { color: var(--blue); }
-	.meta-time { color: #8892b0; }
+	.meta-pts { color: var(--tui-cyan, var(--cyan)); }
+	.meta-author { color: var(--tui-primary, var(--hn-orange)); }
+	.meta-comments { color: var(--tui-blue, var(--blue)); }
+	.meta-time { color: var(--tui-muted, #8892b0); }
 
 	.tui-footer {
 		margin-top: 24px;
 		border-top: 1px solid var(--border-color);
 		padding-top: 12px;
-		color: var(--gray);
+		color: var(--tui-muted, var(--gray));
 		font-size: 12px;
 	}
 
 	.footer-key {
-		color: var(--hn-orange);
+		color: var(--tui-primary, var(--hn-orange));
 		font-weight: bold;
 	}
 
 	.footer-desc {
-		color: var(--gray);
+		color: var(--tui-muted, var(--gray));
+	}
+
+	/* Theme Selector & OS Detection Badge Styles */
+	.theme-selector-container {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: 15px;
+		margin-top: 20px;
+		margin-bottom: 5px;
+	}
+	.theme-label {
+		font-size: 14px;
+		color: var(--text-muted);
+		font-weight: 500;
+	}
+	.theme-buttons {
+		display: flex;
+		gap: 4px;
+		background: rgba(255, 255, 255, 0.03);
+		border: 1px solid var(--border-color);
+		padding: 4px;
+		border-radius: 30px;
+	}
+	.theme-btn {
+		background: transparent;
+		border: none;
+		color: var(--text-muted);
+		padding: 6px 14px;
+		border-radius: 20px;
+		font-size: 13px;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.2s ease-in-out;
+	}
+	.theme-btn:hover {
+		color: var(--text-color);
+	}
+	.theme-btn.active {
+		background: var(--hn-orange);
+		color: #ffffff;
+		box-shadow: 0 0 12px rgba(255, 102, 0, 0.4);
+	}
+
+	.theme-btn[data-tui-theme="dracula"].active { background: #BD93F9; box-shadow: 0 0 12px rgba(189, 147, 249, 0.4); }
+	.theme-btn[data-tui-theme="nord"].active { background: #88C0D0; box-shadow: 0 0 12px rgba(136, 192, 208, 0.4); }
+	.theme-btn[data-tui-theme="monokai"].active { background: #F92672; box-shadow: 0 0 12px rgba(249, 38, 114, 0.4); }
+
+	.os-badge {
+		text-align: center;
+		background: rgba(255, 255, 255, 0.03);
+		border: 1px solid var(--border-color);
+		border-radius: 99px;
+		padding: 8px 20px;
+		font-size: 14px;
+		width: fit-content;
+		margin: 20px auto 10px;
+		color: var(--text-muted);
+	}
+	.os-badge strong {
+		color: var(--hn-orange);
+		text-shadow: 0 0 8px rgba(255, 102, 0, 0.2);
 	}
 
 	/* Features section */
@@ -2715,7 +2833,7 @@ go build -o hn-client main.go</code></pre>
 			commentsList.className = 'tui-comments-list';
 
 			if (item.commentsList && item.commentsList.length > 0) {
-				const indentColors = ['#ff6600', '#00f0ff', '#85a5ff', '#adff2f', '#ff00ff'];
+				const indentColors = ['var(--tui-primary, #ff6600)', 'var(--tui-cyan, #00f0ff)', 'var(--tui-blue, #85a5ff)', 'var(--tui-green, #adff2f)', '#ff00ff'];
 				item.commentsList.forEach(comment => {
 					const commentDiv = document.createElement('div');
 					commentDiv.className = 'tui-comment-item';
@@ -3288,4 +3406,120 @@ func openURL(url string) tea.Cmd {
 			updateLevelUI(currentLevel + 1);
 		}
 	});
+
+	// OS Auto-Detection
+	const osBadge = document.getElementById('os-detection-badge');
+	if (osBadge) {
+		let osName = "Unknown OS";
+		const userAgent = window.navigator.userAgent.toLowerCase();
+		
+		if (userAgent.indexOf("win") !== -1) osName = "Windows";
+		else if (userAgent.indexOf("mac") !== -1) osName = "macOS";
+		else if (userAgent.indexOf("linux") !== -1) osName = "Linux";
+		else if (userAgent.indexOf("x11") !== -1) osName = "Unix";
+		
+		osBadge.innerHTML = `💻 Detected OS: <strong>${osName}</strong> — Get started with the installation below.`;
+	}
+
+	// Live TUI Theme Selector
+	const themeBtns = document.querySelectorAll('[data-tui-theme]');
+	
+	themeBtns.forEach(btn => {
+		btn.addEventListener('click', () => {
+			themeBtns.forEach(b => b.classList.remove('active'));
+			btn.classList.add('active');
+			
+			const selectedTheme = btn.getAttribute('data-tui-theme');
+			if (tuiWindow) {
+				tuiWindow.className = 'terminal-window';
+				if (selectedTheme !== 'orange') {
+					tuiWindow.classList.add(`theme-${selectedTheme}`);
+				}
+			}
+		});
+	});
+
+	// Autoplay Simulation for TUI Window
+	let isAutoplayInterrupted = false;
+	
+	const interruptAutoplay = () => {
+		isAutoplayInterrupted = true;
+	};
+	
+	tuiWindow?.addEventListener('mousedown', interruptAutoplay);
+	tuiWindow?.addEventListener('keydown', interruptAutoplay);
+	
+	const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+	
+	const runAutoplaySimulation = async () => {
+		// Wait for user to scroll to section
+		await wait(2000);
+		if (isAutoplayInterrupted) return;
+		
+		// 1. Cycle tab (simulate tab)
+		if (tuiWindow) {
+			tuiWindow.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
+		}
+		await wait(1800);
+		if (isAutoplayInterrupted) return;
+		
+		// Cycle tab again
+		if (tuiWindow) {
+			tuiWindow.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
+		}
+		await wait(1800);
+		if (isAutoplayInterrupted) return;
+
+		// 2. Navigate down (j)
+		if (tuiWindow) {
+			tuiWindow.dispatchEvent(new KeyboardEvent('keydown', { key: 'j' }));
+		}
+		await wait(1000);
+		if (isAutoplayInterrupted) return;
+
+		if (tuiWindow) {
+			tuiWindow.dispatchEvent(new KeyboardEvent('keydown', { key: 'j' }));
+		}
+		await wait(1000);
+		if (isAutoplayInterrupted) return;
+
+		// 3. Open comments (Enter)
+		if (tuiWindow) {
+			tuiWindow.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+		}
+		await wait(3500);
+		if (isAutoplayInterrupted) return;
+
+		// 4. Scroll down comments (j)
+		if (tuiWindow) {
+			tuiWindow.dispatchEvent(new KeyboardEvent('keydown', { key: 'j' }));
+		}
+		await wait(800);
+		if (isAutoplayInterrupted) return;
+
+		if (tuiWindow) {
+			tuiWindow.dispatchEvent(new KeyboardEvent('keydown', { key: 'j' }));
+		}
+		await wait(1200);
+		if (isAutoplayInterrupted) return;
+
+		// 5. Exit comments (Escape)
+		if (tuiWindow) {
+			tuiWindow.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+		}
+	};
+
+	// Start autoplay when section is visible
+	const terminalSection = document.getElementById('terminal-demo');
+	if (terminalSection) {
+		const autoplayObserver = new IntersectionObserver((entries) => {
+			entries.forEach(entry => {
+				if (entry.isIntersecting) {
+					runAutoplaySimulation();
+					autoplayObserver.disconnect();
+				}
+			});
+		}, { threshold: 0.3 });
+		autoplayObserver.observe(terminalSection);
+	}
 </script>
