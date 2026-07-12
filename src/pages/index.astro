@@ -752,6 +752,8 @@ go build -o hn-client main.go</code></pre>
 		gap: 10px;
 		text-decoration: none;
 		font-family: 'Outfit', sans-serif;
+		white-space: nowrap;
+		flex-shrink: 0;
 	}
 
 	.logo-box {
@@ -1527,7 +1529,14 @@ go build -o hn-client main.go</code></pre>
 	}
 
 	/* Responsive design */
-	@media (max-width: 768px) {
+	@media (max-width: 1024px) {
+		.logo-text {
+			font-size: 15px !important;
+		}
+		.logo-box {
+			font-size: 12px !important;
+			padding: 2px 4px !important;
+		}
 		.hero-title {
 			font-size: 40px;
 		}

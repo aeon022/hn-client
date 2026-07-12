@@ -635,6 +635,8 @@ This client is built with Bubble Tea...</code></pre>
 		gap: 10px;
 		text-decoration: none;
 		font-family: 'Outfit', sans-serif;
+		white-space: nowrap;
+		flex-shrink: 0;
 	}
 
 	.logo-box {
@@ -713,7 +715,14 @@ This client is built with Bubble Tea...</code></pre>
 	}
 
 	/* Responsive tweaks */
-	@media (max-width: 768px) {
+	@media (max-width: 1024px) {
+		.logo-text {
+			font-size: 15px !important;
+		}
+		.logo-box {
+			font-size: 12px !important;
+			padding: 2px 4px !important;
+		}
 		.header-container {
 			flex-direction: row;
 			height: 60px;
