@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+    <defs>
+        <linearGradient id="favicon-grad" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#ff8c3a" />
+            <stop offset="100%" stop-color="#ff6600" />
+        </linearGradient>
+    </defs>
+    <!-- Orange rounded rect -->
+    <rect width="128" height="128" rx="28" fill="url(#favicon-grad)" />
+    <!-- White inner glass border highlight -->
+    <rect x="4" y="4" width="120" height="120" rx="24" stroke="#ffffff" stroke-width="2" opacity="0.15" />
+    <!-- Terminal prompt characters (drawn as crisp vectors) -->
+    <g stroke="#ffffff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Chevron ">" -->
+        <path d="M 26,49 L 38,64 L 26,79" />
+        <!-- Letter "H" -->
+        <path d="M 46,49 L 46,79 M 62,49 L 62,79 M 46,64 L 62,64" />
+        <!-- Letter "N" -->
+        <path d="M 70,79 L 70,49 L 86,79 L 86,49" />
+    </g>
+    <!-- Blinking Cursor "_" -->
+    <rect x="92" y="74" width="12" height="5" fill="#ffffff" opacity="0.8" />
+</svg>
