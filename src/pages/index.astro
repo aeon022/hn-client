@@ -1418,7 +1418,7 @@ go build -o hn-client main.go</code></pre>
 
 	.installation-tabs-container {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 		gap: 30px;
 		margin-top: 50px;
 		max-width: 900px;
@@ -2569,6 +2569,34 @@ go build -o hn-client main.go</code></pre>
 
 	.footer-polar:hover {
 		color: #0062ff !important;
+	}
+
+	/* Small Mobile Devices Optimization (Prevent Horizontal Overscroll) */
+	@media (max-width: 500px) {
+		.tui-header {
+			flex-direction: column !important;
+			align-items: flex-start !important;
+			gap: 10px !important;
+		}
+		.tui-tabs {
+			width: 100% !important;
+			justify-content: space-between !important;
+			gap: 4px !important;
+		}
+		.tui-tab {
+			font-size: 11px !important;
+			padding: 2px 4px !important;
+		}
+		.footer-desc {
+			display: none !important;
+		}
+		.tui-footer {
+			font-size: 11px !important;
+			word-break: break-all !important;
+		}
+		.terminal-body {
+			padding: 10px !important;
+		}
 	}
 </style>
 
